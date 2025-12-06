@@ -18,6 +18,18 @@ export async function loadCss (url){
     }) ;
 }
 
+export const DbFieldExtensions = {
+    extensions: [],
+    loadExtension(extension){
+        this.extensions.push(extension) ;
+    }
+}
+export const DbValueExtensions = {
+    extensions: [],
+    loadExtension(extension){
+        this.extensions.push(extension) ;
+    }
+}
 
 
 if(!customElements.get("db-field")){
@@ -426,19 +438,33 @@ if(!customElements.get("db-field")){
         try{
             //console.log("start load db components extension")
             // @ts-ignore
-            import(`/dbadmin/db-fields-extensions/${window.BAMZ_APP}`).then(async impEx=>{
-                const extensions = impEx.default ;
-                for(let ext of extensions){
+            let promises = [] ;
+            for(let ext of DbFieldExtensions.extensions){
+                if(ext.url){
+                    promises.push(import(ext.url).then(impEx=>{
+                        let extensions = impEx.default ;
+                        if(!Array.isArray(extensions)){
+                            extensions = [extensions] ;     
+                        }
+                        for(let ext of extensions){
+                            DbField.loadExtension(ext) ;
+                            //console.log("load extension", ext)
+                            if(ext.customCss){
+                                // @ts-ignore
+                                return loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
+                            }
+                        }
+                    })) ;
+                }else{
+                    DbField.loadExtension(ext) ;
                     //console.log("load extension", ext)
                     if(ext.customCss){
                         // @ts-ignore
-                        await loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
+                        promises.push(loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP ))) ;
                     }
-                    DbField.loadExtension(ext) ;
                 }
-                //console.log("start load db components extension DONE")
-                resolve() ;
-            }).catch(err=>reject(err)) ;
+            }
+            Promise.all(promises).then(()=>resolve()).catch(err=>reject(err)) ;
         }catch(err){
             reject(err) ;
         }
@@ -924,23 +950,38 @@ if(!customElements.get("db-value")){
         ]
     }
     
+
     const waitForExtensionsLoaded = new Promise((resolve, reject)=>{
         try{
             //console.log("start load db components extension")
             // @ts-ignore
-            import(`/dbadmin/db-values-extensions/${window.BAMZ_APP}`).then(async impEx=>{
-                const extensions = impEx.default ;
-                for(let ext of extensions){
+            let promises = [] ;
+            for(let ext of DbValueExtensions.extensions){
+                if(ext.url){
+                    promises.push(import(ext.url).then(impEx=>{
+                        let extensions = impEx.default ;
+                        if(!Array.isArray(extensions)){
+                            extensions = [extensions] ;     
+                        }
+                        for(let ext of extensions){
+                            DbValue.loadExtension(ext) ;
+                            //console.log("load extension", ext)
+                            if(ext.customCss){
+                                // @ts-ignore
+                                return loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
+                            }
+                        }
+                    })) ;
+                }else{
+                    DbValue.loadExtension(ext) ;
                     //console.log("load extension", ext)
                     if(ext.customCss){
                         // @ts-ignore
-                        await loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
+                        promises.push(loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP ))) ;
                     }
-                    DbValue.loadExtension(ext) ;
                 }
-                //console.log("start load db components extension DONE")
-                resolve() ;
-            }).catch(err=>reject(err)) ;
+            }
+            Promise.all(promises).then(()=>resolve()).catch(err=>reject(err)) ;
         }catch(err){
             reject(err) ;
         }

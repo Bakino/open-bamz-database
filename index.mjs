@@ -1168,7 +1168,7 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
         // path in which the plugin provide its front end files
         frontEndPath: "front",
         //lib that will be automatically load in frontend
-        frontEndLib: "lib/db-lib.mjs",
+        frontEndLib: "lib/db-loader.mjs",
         router: router,
         menu: [
             { name: "admin", entries: [
