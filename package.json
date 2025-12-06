@@ -1,0 +1,16 @@
+{
+  "name": "open-bamz-database",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "Open BamZ database plugin",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1"
+  }
+}
