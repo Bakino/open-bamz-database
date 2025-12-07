@@ -61,7 +61,14 @@ function prepareQueryArgs(query, params, typesByName, cleanArgs){
                 formattedValue = JSON.stringify(value).replace(/"(\w+)":/g, '$1:') ;
             }
         }else if(arg?.type?.kind === "LIST"){
-            formattedValue = JSON.stringify(value) ;
+            if(typeOfArg?.kind === "ENUM"){
+                if(!Array.isArray(value)){
+                    value = [value] ;
+                }
+                formattedValue = `[${value.join(",")}]` ;
+            }else{
+                formattedValue = JSON.stringify(value) ;
+            }
         }else if(typeOfArg?.kind === "ENUM" || ["Int", "Float",  "Boolean"].includes(typeOfArg?.name)){
             formattedValue = value ;
         }else{
