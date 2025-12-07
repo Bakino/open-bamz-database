@@ -124,13 +124,6 @@ class GraphqlClient {
             mutations: {},
             queries: {}
         } ;
-        // Authentication will use in priority the application JWT token if any, then the global JWT token
-        this.tokenPriority = ["openbamz-app-jwt", "openbamz-jwt"] ;
-        // @ts-ignore
-        if(window.BAMZ_IN_PLUGIN){
-            // when running in plugin, the global JWT token is used
-            this.tokenPriority = ["openbamz-jwt"] ;
-        }
     }
 
     cloneTransaction(){
@@ -572,32 +565,15 @@ class GraphqlClient {
             "Content-Type": "application/json",
             Accept: "application/json",
         } ;
-        let jwt = null;
-        let usedTokenName = null;
-        for(let tokenName of this.tokenPriority){
-            jwt = localStorage.getItem(tokenName) ;
-            if(jwt){
-                usedTokenName = tokenName ;
-                break;
-            }
-        }
-        if(jwt){
-            headers.Authorization = "Bearer "+jwt
-        }
         let result = await fetch("/graphql/"+this.appName, {
             method: "POST",
             headers: headers,
+            credentials: "include",
             body: JSON.stringify({ query: query }),
         }) ;
         /** @type {any} */
         let jsonResult = await result.json() ;
         if(jsonResult.errors){
-            if(jsonResult.errors[0]?.message === "jwt expired"){
-                // The JWT token is expired, recall without token
-                console.warn("JWT token expired, try to recall without token") ;
-                localStorage.removeItem(usedTokenName) ;
-                return await this.queryGraphql(query) ;
-            }
             console.warn("Error while call query "+query, jsonResult) ;
             throw jsonResult.errors.map(e=>e.message).join(",")
         }
