@@ -111,6 +111,10 @@ function prepareQueryOutput(output, outputTypeName,typesByName, depth){
                     //don't go deeper
                     continue;
                 }
+                if(field.description && field.description.startsWith('Reads ')){
+                    //skip relational field that read other tables
+                    continue;
+                }
                 output[field.name] = {};
                 prepareQueryOutput(output[field.name], fieldType.name, typesByName, depth+1)
             }else{
