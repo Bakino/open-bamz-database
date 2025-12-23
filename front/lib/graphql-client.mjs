@@ -72,7 +72,11 @@ function prepareQueryArgs(query, params, typesByName, cleanArgs){
         }else if(typeOfArg?.kind === "ENUM" || ["Int", "Float",  "Boolean"].includes(typeOfArg?.name)){
             formattedValue = value ;
         }else{
-            formattedValue = `"${value.replaceAll('"', '\\"')}"` ;
+            if(value.includes("\n")){
+                formattedValue = `"""${value}"""` ;
+            }else{
+                formattedValue = `"${value.replaceAll('"', '\\"')}"` ;
+            }
         }
         input.push(`${arg.name}: ${formattedValue}`)
     }

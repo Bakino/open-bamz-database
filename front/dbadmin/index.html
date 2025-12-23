@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages Settings</title>
+    <title>Database admin</title>
     <style>
         html, body, body>div[zz-bind-root] {
             height: 100%;
@@ -11,6 +11,11 @@
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="/plugin/open-bamz-ag-grid/lib/ag-grid-lib.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs/editor/editor.main.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs/loader.js"></script>
 </head>
 <body>
     
@@ -18,7 +23,16 @@
         import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/viewz.mjs" ;
         import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/frameworkz.mjs" ;
         import { AgGridExtensions } from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-ag-grid@latest/front/lib/ag-grid-extension.mjs" ;
-        //import viewzExtension from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@latest/front/lib/ag-grid-viewz.mjs" ;
+        
+        import { DbFieldExtensions, DbValueExtensions } from "/plugin/open-bamz-database/lib/db-components.mjs" ;
+
+        DbFieldExtensions.loadExtension({
+            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@d832962ece8d4c71b9727f80e86fd6a6ee61765a/front/lib/db-components-bootstrap5.mjs`,
+        }) ;
+        
+        DbValueExtensions.loadExtension({
+            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@d832962ece8d4c71b9727f80e86fd6a6ee61765a/front/lib/db-values-bootstrap5.mjs`,
+        }) ;
 
         AgGridExtensions.loadExtension({
             url : `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@latest/front/lib/ag-grid-viewz.mjs`

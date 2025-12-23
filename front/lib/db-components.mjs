@@ -31,7 +31,6 @@ export const DbValueExtensions = {
     }
 }
 
-
 if(!customElements.get("db-field")){
     const convertToDateTimeLocalString = (date) => {
         if(!date){ return null; }
@@ -433,42 +432,48 @@ if(!customElements.get("db-field")){
     }
     
     
-    
-    const waitForExtensionsLoaded = new Promise((resolve, reject)=>{
+    let loadingDbFieldExtensions = false ;
+    const loadDbFieldExtensions = async function(){
         try{
+            if(loadingDbFieldExtensions){
+                await new Promise((resolve)=>{ setTimeout(resolve, 100) ; }) ;
+                return await loadDbFieldExtensions() ;
+            }
+            loadingDbFieldExtensions = true ;
             //console.log("start load db components extension")
             // @ts-ignore
             let promises = [] ;
             for(let ext of DbFieldExtensions.extensions){
+                if(ext.isLoaded){ continue ; }
+                ext.isLoaded = true ;
                 if(ext.url){
-                    promises.push(import(ext.url).then(impEx=>{
-                        let extensions = impEx.default ;
-                        if(!Array.isArray(extensions)){
-                            extensions = [extensions] ;     
+                    const impEx = await import(ext.url) ;
+                    let extensions = impEx.default ;
+                    if(!Array.isArray(extensions)){
+                        extensions = [extensions] ;     
+                    }
+                    for(let ext of extensions){
+                        DbField.loadExtension(ext) ;
+                        //console.log("load extension", ext)
+                        if(ext.customCss){
+                            // @ts-ignore
+                            return loadCss(ext.customCss) ;
                         }
-                        for(let ext of extensions){
-                            DbField.loadExtension(ext) ;
-                            //console.log("load extension", ext)
-                            if(ext.customCss){
-                                // @ts-ignore
-                                return loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
-                            }
-                        }
-                    })) ;
+                    }
                 }else{
                     DbField.loadExtension(ext) ;
                     //console.log("load extension", ext)
                     if(ext.customCss){
                         // @ts-ignore
-                        promises.push(loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP ))) ;
+                        promises.push(loadCss(ext.customCss)) ;
                     }
                 }
             }
-            Promise.all(promises).then(()=>resolve()).catch(err=>reject(err)) ;
-        }catch(err){
-            reject(err) ;
+        }finally{
+            loadingDbFieldExtensions = false ;
         }
-    }) ;
+    }
+
     
     
     class DbField extends HTMLElement {
@@ -658,7 +663,7 @@ if(!customElements.get("db-field")){
             //console.log("init field", this.getAttribute("db-app"), this.getAttribute("db-schema"), this.getAttribute("db-table"), this.getAttribute("db-column")) ;
             
             //console.log("wait for extension start", waitForExtensionsLoaded) ;
-            await waitForExtensionsLoaded ;
+            await loadDbFieldExtensions() ;
             
             //console.log("wait for extension done") ;
     
@@ -949,43 +954,48 @@ if(!customElements.get("db-value")){
             }
         ]
     }
-    
 
-    const waitForExtensionsLoaded = new Promise((resolve, reject)=>{
+    let loadingValueFieldExtensions = false ;
+    const loadValueFieldExtensions = async function(){
         try{
+            if(loadingValueFieldExtensions){
+                await new Promise((resolve)=>{ setTimeout(resolve, 100) ; }) ;
+                return await loadValueFieldExtensions() ;
+            }
+            loadingValueFieldExtensions = true ;
             //console.log("start load db components extension")
             // @ts-ignore
             let promises = [] ;
-            for(let ext of DbValueExtensions.extensions){
+            for(let ext of DbFieldExtensions.extensions){
+                if(ext.isLoaded){ continue ; }
+                ext.isLoaded = true ;
                 if(ext.url){
-                    promises.push(import(ext.url).then(impEx=>{
-                        let extensions = impEx.default ;
-                        if(!Array.isArray(extensions)){
-                            extensions = [extensions] ;     
+                    const impEx = await import(ext.url) ;
+                    let extensions = impEx.default ;
+                    if(!Array.isArray(extensions)){
+                        extensions = [extensions] ;     
+                    }
+                    for(let ext of extensions){
+                        DbValue.loadExtension(ext) ;
+                        //console.log("load extension", ext)
+                        if(ext.customCss){
+                            // @ts-ignore
+                            return loadCss(ext.customCss) ;
                         }
-                        for(let ext of extensions){
-                            DbValue.loadExtension(ext) ;
-                            //console.log("load extension", ext)
-                            if(ext.customCss){
-                                // @ts-ignore
-                                return loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP )) ;
-                            }
-                        }
-                    })) ;
+                    }
                 }else{
                     DbValue.loadExtension(ext) ;
                     //console.log("load extension", ext)
                     if(ext.customCss){
                         // @ts-ignore
-                        promises.push(loadCss(ext.customCss.replaceAll(":appName",window.BAMZ_APP ))) ;
+                        promises.push(loadCss(ext.customCss)) ;
                     }
                 }
             }
-            Promise.all(promises).then(()=>resolve()).catch(err=>reject(err)) ;
-        }catch(err){
-            reject(err) ;
+        }finally{
+            loadingValueFieldExtensions = false ;
         }
-    }) ;
+    }
 
     class DbValue extends HTMLElement {
         static extension = DEFAULT_EXTENSION_VALUE ;
@@ -1175,7 +1185,7 @@ if(!customElements.get("db-value")){
     
         async init(){
 
-            await waitForExtensionsLoaded ;
+            await loadValueFieldExtensions() ;
     
             let type = this.type ;
             let label = this.label;
