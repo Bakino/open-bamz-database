@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "lib": [ "es2024", "dom" ],
-    "module": "es2022",
+    "module": "esnext",
     "strict": false,
     "allowJs": true,
     "checkJs": true,
+    "outDir": "$$ts-jest$$",
     "moduleResolution": "node",
     "types": ["node"]
   },

@@ -1,0 +1,15 @@
+.grid-result {
+  margin-top: 5px;
+  height: 400px;
+}
+
+#results {
+    height: 480px
+}
+.result-header {
+  max-width: 150px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  white-space-collapse: collapse;
+  text-wrap-mode: nowrap;
+}

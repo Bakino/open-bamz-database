@@ -1,0 +1,159 @@
+<div class="d-flex h-100 flex-column">
+  <div class="container-fluid mb-4">
+    <div class="row">
+      <div class="col-6 col-lg-3 col-xxl-4">
+        <div class="form-floating mb-3">
+          <input
+            type="text"
+            id="funcName"
+            placeholder="Label"
+            z-bind="funcName"
+            class="form-control"
+          />
+          <label for="floatingInput">Function description</label>
+        </div>
+      </div>
+      <div id="icflz" class="col-6 col-lg-3 col-xxl-3">
+        <div id="idd5u" class="form-floating mb-3">
+          <input
+            type="text"
+            placeholder="Label"
+            z-bind="func"
+            id="func"
+            class="form-control"
+          />
+          <label for="floatingInput">Function name</label>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3 col-xxl-2">
+        <div class="form-floating mb-3">
+          <select
+            z-bind="language"
+            placeholder="Language"
+            id="iybck"
+            class="form-control"
+          >
+            <option value="plv8">Javascript (PLv8)</option>
+            <option value="plpgsql">PL/pgSQL</option>
+            <option value="sql">SQL</option>
+          </select>
+          <label for="result">Language</label>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3 col-xxl-12 fw-bold">
+        <span>Trigger event</span>
+      </div>
+      <div
+        id="i8703"
+        class="col-6 col-lg-3 col-xxl-12 d-flex align-items-center mb-2"
+      >
+        <div class="me-xxl-1 me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              id="myCheckbox"
+              z-bind="triggerDef.beforeInsert"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              BEFORE INSERT
+            </label>
+          </div>
+        </div>
+        <div class="me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              z-bind="triggerDef.afterInsert"
+              id="i12um"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              AFTER INSERT
+            </label>
+          </div>
+        </div>
+        <div class="me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              z-bind="triggerDef.beforeUpdate"
+              id="iiehx"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              BEFORE UPDATE
+            </label>
+          </div>
+        </div>
+        <div class="me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              z-bind="triggerDef.afterUpdate"
+              id="iacs3"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              AFTER UPDATE
+            </label>
+          </div>
+        </div>
+        <div class="me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              z-bind="triggerDef.beforeDelete"
+              id="iin2j"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              BEFORE DELETE
+            </label>
+          </div>
+        </div>
+        <div class="me-1">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              value=""
+              z-bind="triggerDef.afterDelete"
+              id="ivun7"
+              class="form-check-input"
+            />
+            <label for="myCheckbox" class="form-check-label">
+              AFTER DELETE
+            </label>
+          </div>
+        </div>
+        <div class="ms-auto">
+          <button
+            type="button"
+            title="Run SQL"
+            z-on-click="view.runSQL()"
+            id="ijm8u"
+            class="btn btn-primary"
+          >
+            Run SQL
+          </button>
+        </div>
+        <div id="i282e" class="ms-2">
+          <button
+            type="button"
+            title="Run SQL"
+            z-on-click="view.deleteTrigger()"
+            class="btn btn-danger"
+          >
+            Delete trigger
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex-grow-1"><div id="funcEditor" class="h-100"></div></div>
+</div>

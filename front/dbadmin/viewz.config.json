@@ -1,0 +1,50 @@
+{
+  "routing": "HASH",
+  "viewsPath": "views",
+  "routes": [
+     {
+      "url": "/",
+      "path": "root",
+      "subRoutes": [
+        {
+          "url": "/welcome",
+          "path": "welcome",
+          "defaultChild": true
+        },
+        {
+            "url": "/edit_table/:schema{/:table}",
+            "path": "edit_table"
+        },
+        {
+            "url": "/edit_func/:schema{/:func}",
+            "path": "edit_func"
+        },
+        {
+            "url": "/edit_trigger/:schema/:table{/:func}",
+            "path": "edit_trigger"
+        },
+        {
+            "url": "/view_table/:schema/:table",
+            "path": "view_table"
+        },
+        {
+            "url": "/run_sql{/:sql}",
+            "path": "run_sql"
+        },
+        {
+            "url": "/edit_record/:schema/:table{/:id}",
+            "path": "edit_record"
+        }
+      ]
+    },
+    {
+      "url": "/popup/edit_enum/",
+      "path": "edit_enum"
+    }
+  ],
+  "extensions": [
+    { "url": "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@e2d044437e3ef435b64255c2d117caa85e538ec7/front/lib/viewz-bootstrap5.mjs" },
+    { "url": "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-ag-grid@latest/front/lib/viewz-ag-grid.mjs" },
+    { "url": "/plugin/open-bamz-database/lib/viewz-dbadmin.mjs" }
+  ]
+} 

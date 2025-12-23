@@ -1,0 +1,11 @@
+.btn-copy {
+  opacity: 0.1;
+  transition-behavior: normal;
+  transition-duration: 0.8s;
+  transition-timing-function: ease;
+  transition-delay: 0s;
+  transition-property: opacity;
+}
+.btn-copy:hover {
+  opacity: 1;
+}

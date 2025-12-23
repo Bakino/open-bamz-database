@@ -1,0 +1,59 @@
+<div class="d-flex h-100 flex-column">
+  <div id="sqlEditor" class="flex-grow-1"></div>
+  <div class="mt-2">
+    <button
+      type="button"
+      id="ink39"
+      z-on-click="view.runSql()"
+      class="btn btn-primary"
+    >
+      <span>Run SQL now</span>
+    </button>
+  </div>
+  <div id="results" class="mt-2" z-show-if="results.length>0">
+    <ul id="myTab" role="tablist" class="nav nav-tabs">
+      <li role="presentation" z-bind="(result,index) of results" class="nav-item">
+        <button
+          id="home-tab-${index}"
+          data-bs-toggle="tab"
+          data-bs-target="#home-tab-pane-${index}"
+          type="button"
+          role="tab"
+          aria-controls="home-tab-pane-${index}"
+          aria-selected="true"
+          z-class="${index==0?'active':''}"
+          class="nav-link result-header"
+        >
+          <span id="ibemx">${result.query}</span>
+        </button>
+      </li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+      <div
+        z-bind="(result,index) of results"
+        id="home-tab-pane-index"
+        role="tabpanel"
+        aria-labelledby="home-tab-index"
+        tabindex="0"
+        z-class="${index==0?'show active':''}"
+        class="tab-pane fade"
+      >
+        <div z-show-if="result.countResult">
+          
+          <div role="alert" class="alert mt-2 alert-secondary">
+            
+            <div><span>Affected rows : ${result.result}</span></div>
+        </div>
+        </div>
+        <div z-show-if="result.noResult"><div role="alert" class="alert mt-2 alert-secondary">
+            
+            <div><span>No result</span></div>
+        </div></div>
+        
+        <div z-show-if="!result.countResult && !result.noResult">
+          <div class="grid-result ag-theme-quartz"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

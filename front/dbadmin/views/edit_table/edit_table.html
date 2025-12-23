@@ -1,0 +1,59 @@
+<div class="container-fluid mb-4">
+  <div class="row">
+    <div class="col-6 col-lg-3 col-xxl-6">
+      <div class="mb-3">
+        <label for="tableName" class="form-label">Table name</label>
+        <input
+          type="text"
+          id="tableName"
+          placeholder="Table name"
+          z-bind="tableName"
+          class="form-control"
+        />
+      </div>
+    </div>
+    <div class="col-6 col-lg-3 col-xxl-6">
+      <div class="mb-3">
+        <label for="tableCode" class="form-label">Table code</label>
+        <input
+          type="text"
+          placeholder="Table code"
+          id="tableCode"
+          z-bind="table"
+          class="form-control"
+        />
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="mb-3">
+        <label for="tableExpression" class="form-label">Record label expression</label>
+        <input
+          type="text"
+          placeholder="literal(Label expression. Ex: [${code}] ${name})"
+          id="tableExpression"
+          z-bind="options.label_expression"
+          class="form-control"
+        />
+      </div>
+    </div>
+    <div class="col-12"><div id="grid" class="ag-theme-quartz"></div></div>
+    <div class="col-12">
+      <div class="row mt-2 align-items-end">
+        <div class="col-12 col-lg-6 col-xxl-2"><span>SQL to run :</span></div>
+        <div class="col-12 col-lg-6 col-xxl-4 text-center">
+          <button
+            type="button"
+            id="ink39"
+            z-on-click="view.runSql()"
+            class="btn btn-primary w-100"
+          >
+            <span>Run SQL now</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="izfix" class="col-12 col-lg-6 col-xxl-12 pt-3">
+      <div id="sqlEditor"></div>
+    </div>
+  </div>
+</div>

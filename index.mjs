@@ -554,6 +554,10 @@ $$
     
     let result = plv8.execute(sql);
 
+    if(result.length===0){
+        throw new Error("Function \"+p_schema+\".\"+p_func+\" not found") ;
+    }
+
     funcMeta.description = result[0].description;
     funcMeta.language = result[0].language;
     if(result[0].arguments){
@@ -578,7 +582,11 @@ $$
 LANGUAGE "plv8"`) ;
 
 
-    await grantSchemaAccess("dbadmin") ;
+    await grantSchemaAccess("dbadmin", [
+        {role: "admin", level: "admin"},
+        {role: "user", level: "none"},
+        {role: "readonly", level: "none"},
+    ]) ;
 
 }
 
@@ -615,6 +623,7 @@ export const initPlugin = async ({ loadPluginData, graphql, hasCurrentPlugin, co
         let finalType = getFinalType(type) ;
         let typeName = finalType.name ;
         if(finalType.name === "ID"){ typeName = "string" ; }
+        if(finalType.name === "UUID"){ typeName = "string" ; }
         if(finalType.name === "String"){ typeName = "string" ; }
         if(finalType.name === "Cursor"){ typeName = "string" ; }
         if(finalType.name === "Int"){ typeName = "number" ; }
@@ -1167,12 +1176,14 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
     return {
         // path in which the plugin provide its front end files
         frontEndPath: "front",
+        frontEndPublic: "lib",
         //lib that will be automatically load in frontend
         frontEndLib: "lib/db-loader.mjs",
+        graphqlSchemas: "dbadmin",
         router: router,
         menu: [
             { name: "admin", entries: [
-                { name: "Database admin", link: "/plugin/dbadmin/" }
+                { name: "Database admin", link: "/plugin/open-bamz-database/dbadmin/" }
             ]}
         ],
         pluginSlots: {

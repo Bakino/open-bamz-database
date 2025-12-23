@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages Settings</title>
+    <style>
+        html, body, body>div[zz-bind-root] {
+            height: 100%;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/plugin/open-bamz-ag-grid/lib/ag-grid-lib.css" rel="stylesheet">
+</head>
+<body>
+    
+    <script type="module">
+        import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/viewz.mjs" ;
+        import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/frameworkz.mjs" ;
+        import { AgGridExtensions } from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-ag-grid@latest/front/lib/ag-grid-extension.mjs" ;
+        //import viewzExtension from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@latest/front/lib/ag-grid-viewz.mjs" ;
+
+        AgGridExtensions.loadExtension({
+            url : `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@latest/front/lib/ag-grid-viewz.mjs`
+        }) ;
+        AgGridExtensions.loadExtension({
+            url : `${window.location.origin}/plugin/open-bamz-database/lib/ag-grid-dbadmin.mjs`
+        }) ;
+
+        
+
+
+        const PG_TYPES = [
+            {
+                group: "Numeric",
+                types: [
+                    { value: "smallint", label: "Small integer", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "integer", label: "Integer", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "bigint", label: "Big integer", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "numeric", label: "Arbitrary precision number", precision: ["precision","scale"], link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "real", label: "Decimal (float)", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "double precision", label: "Decimal (double)", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "smallserial", label: "Small serial (autoinc)", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "serial", label: "Serial (autoinc)", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                    { value: "bigserial", label: "Big serial (autoinc)", link: "https://www.postgresql.org/docs/current/datatype-numeric.html"},
+                ]
+            },
+            {
+                group: "Text",
+                types: [
+                    { value: "text", label: "Text (string)", link: "https://www.postgresql.org/docs/current/datatype-character.html"},
+                    { value: "bpchar", label: "Text trimmed (string)", link: "https://www.postgresql.org/docs/current/datatype-character.html"},
+                    { value: "character varying", label: "Text with limit (varchar)", precision: ["length"], link: "https://www.postgresql.org/docs/current/datatype-character.html"},
+                ]
+            },
+            {
+                group: "Date/Time",
+                types: [
+                    { value: "date", label: "Date", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                    { value: "timestamp without time zone", label: "Date and time (no timezone)", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                    { value: "timestamp with time zone", label: "Date and time (with timezone)", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                    { value: "time without time zone", label: "Time (no timezone)", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                    { value: "time with time zone", label: "Time (with timezone)", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                    { value: "interval", label: "Interval", link: "https://www.postgresql.org/docs/current/datatype-datetime.html"},
+                ]
+            },
+            {
+                group: "Boolean",
+                types: [
+                    { value: "boolean", label: "Boolean", link: "https://www.postgresql.org/docs/current/datatype-boolean.html"},
+                ]
+            },
+            {
+                group: "Binary",
+                types: [
+                    { value: "bytea", label: "Binary string (buffer)", link: "https://www.postgresql.org/docs/current/datatype-binary.html"},
+                ]
+            },
+            {
+                group: "UUID",
+                types: [
+                    { value: "uuid", label: "UUID (unique ID)", link: "https://www.postgresql.org/docs/current/datatype-uuid.html"},
+                ]
+            },
+            {
+                group: "Structured data",
+                types: [
+                    { value: "jsonb", label: "JSON", link: "https://www.postgresql.org/docs/current/datatype-json.html"},
+                    { value: "xml", label: "XML", link: "https://www.postgresql.org/docs/current/datatype-xml.html"},
+                ]
+            },
+        ] ;
+        ViewZ.loadExtension({
+            globals: {
+                PG_TYPES: PG_TYPES
+            },
+        }) ;
+
+        startViewZ("viewz.config.json") ;
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

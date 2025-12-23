@@ -1,0 +1,6 @@
+.ag-center-cols-viewport {
+  min-height: unset !important;
+}
+#sqlEditor {
+  height: 500px;
+}

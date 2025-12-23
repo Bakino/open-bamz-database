@@ -1,0 +1,110 @@
+
+    <div class="container-fluid">
+      <form>
+        <div class="row">
+          <div id="is38kz" class="col-12">
+            <div class="mb-3">
+              <label for="type" class="form-label">Type of field</label>
+              <select
+                type="text"
+                id="type"
+                z-bind="column.enumOptions.type"
+                class="form-control form-select"
+              >
+                <option value="select">Select</option>
+                <option value="radio">Radio</option>
+              </select>
+            </div>
+        <div id="is38kz" class="col-12">
+            <div class="list-group">
+              <div
+                id="ixtvx"
+                z-bind="entry of column.enumOptions.values"
+                class="list-group-item d-flex"
+              >
+                <div class="flex-grow-1 me-1">
+              <input
+                type="text"
+                id="i7xkn"
+                placeholder="Value"
+                z-bind="entry.value"
+                required=""
+                class="form-control"
+              />
+            </div>
+            <div class="flex-grow-1 ms-1">
+              <input
+                type="text"
+                placeholder="Label"
+                id="inkyh"
+                z-bind="entry.label"
+                required=""
+                class="form-control"
+              />
+            </div>
+            <div id="i9ib7" class="ms-2">
+              <button
+                type="button"
+                z-on-click="view.removeLine(entry)"
+                class="btn btn-primary"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                  class="bi bi-dash-circle"
+                >
+                  <path
+                    d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                  ></path>
+                  <path
+                    d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+    </div>
+    </div>
+    <div class="col-12">
+      <button
+        type="button"
+        id="iw9bx"
+        z-on-click="column.enumOptions.values.push({})"
+        class="btn btn-primary mt-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          viewBox="0 0 16 16"
+          class="bi bi-plus-circle"
+        >
+          <path
+            d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+          ></path>
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+          ></path>
+        </svg>
+        <span>Add value</span>
+      </button>
+    </div>
+    <div class="col-12">
+      <button
+        type="button"
+        id="i7po5"
+        z-on-click="view.validate()"
+        class="btn w-100 btn-success mt-2"
+      >
+        <span>Validate</span>
+      </button>
+    </div>
+        </div>
+      </form>
+    </div>
+

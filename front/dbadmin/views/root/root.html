@@ -1,0 +1,297 @@
+<div class="sidebar-container">
+  <div id="sidebar" class="sidebar text-bg-dark">
+    <div id="toggleBtn" class="toggle-btn">←</div>
+    <div class="sidebar-content pt-3">
+      <h4 class="mt-2 d-flex text-white align-items-baseline">
+        <img src="./logo_white.svg" class="me-xxl-2 ms-xxl-1" />
+        <span>DB explorer</span>
+      </h4>
+      <div id="file-tree">
+        <ul id="file-list" class="ps-0">
+          <li z-bind="schema of schemas" class="directory">
+            <div class="d-flex align-items-center">
+              <button
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-${schema.schema}"
+                aria-expanded="true"
+                aria-controls="collapseExample"
+                class="btn text-white b-0 p-0 m-0"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                  class="bi bi-chevron-down"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"
+                  ></path>
+                </svg>
+                <span class="filename">${schema.schema}</span>
+              </button>
+            </div>
+            <div id="collapse-${schema.schema}" class="collapse show">
+              <ul id="i3fni">
+                <li z-bind="table of schema.tables" class="file">
+                  <div class="d-flex align-items-center  item-menu">
+                    <button
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#collapse-${table.table}"
+                      aria-expanded="true"
+                      aria-controls="collapseExample"
+                      class="btn text-white b-0 p-0 m-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                        class="bi bi-chevron-down"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"
+                        ></path>
+                      </svg>
+                    </button>
+                    <div
+                      id="iqm28"
+                      z-on-click="view.selectTable(table)"
+                      class="filename d-flex ms-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                        class="bi bi-table mt-1"
+                      >
+                        <path
+                          d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 2h-4v3h4zm0 4h-4v3h4zm0 4h-4v3h3a1 1 0 0 0 1-1zm-5 3v-3H6v3zm-5 0v-3H1v2a1 1 0 0 0 1 1zm-4-4h4V8H1zm0-4h4V4H1zm5-3v3h4V4zm4 4H6v3h4z"
+                        ></path>
+                      </svg>
+                      <div id="ie7r7" class="ms-1">
+                        <div class="table-name">
+                          ${table.description}
+                        </div>
+                        <div id="ihg5j" class="table-code">
+                          ${table.table}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    id="collapse-${table.table}"
+                    class="collapse show"
+                  >
+                    <ul id="i3fni-2">
+                      <li z-bind="trigger of table.triggers" class="file">
+                        <div id="idl3t-2" class="d-flex align-items-center item-menu">
+                          <div
+                            id="iqm28-2"
+                            z-on-click="view.selectTrigger(trigger)"
+                            class="filename d-flex ps-3"
+                          >
+                            <div id="ie7r7-2" class="ms-1">
+                              <div class="table-name d-flex align-items-center">
+                                <span
+                                  z-bind="event of trigger.events"
+                                  title="${event.timing} ${event.action}"
+                                  class="trigger-event me-1"
+                                >
+                                  <span
+                                    z-show-if="event.timing=='BEFORE' && event.action=='UPDATE'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-pencil"
+                                    >
+                                      <path
+                                        d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                  <span
+                                    z-show-if="event.timing=='AFTER' && event.action=='UPDATE'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-pencil-fill"
+                                    >
+                                      <path
+                                        d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                  <span
+                                    z-show-if="event.timing=='BEFORE' && event.action=='INSERT'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-plus-circle"
+                                    >
+                                      <path
+                                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                                      ></path>
+                                      <path
+                                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                  <span
+                                    z-show-if="event.timing=='AFTER' && event.action=='INSERT'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-plus-circle-fill"
+                                    >
+                                      <path
+                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                  <span
+                                    z-show-if="event.timing=='BEFORE' && event.action=='DELETE'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-dash-circle"
+                                    >
+                                      <path
+                                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                                      ></path>
+                                      <path
+                                        d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                  <span
+                                    z-show-if="event.timing=='AFTER' && event.action=='DELETE'"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      fill="currentColor"
+                                      viewBox="0 0 16 16"
+                                      class="bi bi-dash-circle-fill"
+                                    >
+                                      <path
+                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z"
+                                      ></path>
+                                    </svg>
+                                  </span>
+                                </span>
+                                <span>
+                                  ${trigger.description}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+              <ul id="i3fsni">
+                <li z-bind="func of schema.functions" class="file">
+                  <div id="idl3t-2-2" class="d-flex align-items-center item-menu" 
+                    z-show-if="func.result !== 'trigger'">
+                    <div
+                      id="iqm28-2-2"
+                      z-on-click="view.selectFunc(func)"
+                      class="filename d-flex"
+                    >
+                      <svg
+                        z-show-if="func.language=='plv8'"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 32 32"
+                      >
+                        <path
+                          fill="#F1DD3F"
+                          d="M11.4 10h2.7v7.6c0 3.4-1.6 4.6-4.3 4.6-.6 0-1.5-.1-2-.3l.3-2.2c.4.2.9.3 1.4.3 1.1 0 1.9-.5 1.9-2.4V10zm5.1 9.2c.7.4 1.9.8 3 .8 1.3 0 1.9-.5 1.9-1.3s-.6-1.2-2-1.7c-2-.7-3.3-1.8-3.3-3.6 0-2.1 1.7-3.6 4.6-3.6 1.4 0 2.4.3 3.1.6l-.6 2.2c-.5-.2-1.3-.6-2.5-.6s-1.8.5-1.8 1.2c0 .8.7 1.1 2.2 1.7 2.1.8 3.1 1.9 3.1 3.6 0 2-1.6 3.7-4.9 3.7-1.4 0-2.7-.4-3.4-.7l.6-2.3z"
+                        ></path></svg
+                      ><svg
+                        z-show-if="func.language!='plv8'"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 32 32"
+                      >
+                        <path
+                          fill="#529BBA"
+                          d="M7.5 15.1c1.5 0 1.7-.8 1.7-1.5 0-.6-.1-1.1-.1-1.7S9 10.7 9 10.2c0-2.1 1.3-3 3.4-3h.8v1.9h-.4c-1 0-1.3.6-1.3 1.6 0 .4.1.8.1 1.3 0 .4.1.9.1 1.5 0 1.7-.7 2.3-1.9 2.6 1.2.3 1.9.9 1.9 2.6 0 .6-.1 1.1-.1 1.5 0 .4-.1.9-.1 1.2 0 1 .3 1.6 1.3 1.6h.4v1.9h-.8c-2 0-3.3-.8-3.3-3 0-.6 0-1.1.1-1.7.1-.6.1-1.2.1-1.7 0-.6-.2-1.5-1.7-1.5l-.1-1.9zm17 1.7c-1.5 0-1.7.9-1.7 1.5s.1 1.1.1 1.7c.1.6.1 1.2.1 1.7 0 2.2-1.4 3-3.4 3h-.8V23h.4c1 0 1.3-.6 1.3-1.6 0-.4 0-.8-.1-1.2 0-.5-.1-1-.1-1.5 0-1.7.7-2.3 1.9-2.6-1.2-.3-1.9-.9-1.9-2.6 0-.6.1-1.1.1-1.5.1-.5.1-.9.1-1.3 0-1-.4-1.5-1.3-1.6h-.4V7.2h.8c2.1 0 3.4.9 3.4 3 0 .6-.1 1.1-.1 1.7-.1.6-.1 1.2-.1 1.7 0 .7.2 1.5 1.7 1.5v1.7z"
+                        ></path>
+                      </svg>
+                      <div id="ie7r7-2-2" class="ms-1">
+                        <div class="table-name">
+                          ${func.function}()
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <button
+        type="button"
+        id="ih3f7"
+        z-on-click="view.newTable()"
+        class="btn btn-sm mb-2 btn-primary w-100"
+      >
+        <span>Create table</span>
+      </button>
+      <button
+        type="button"
+        id="ih3f7-2"
+        z-on-click="view.newFunc()"
+        class="btn btn-sm mb-2 btn-primary w-100"
+      >
+        <span>Create function</span>
+      </button>
+      <button
+        type="button"
+        id="ih3f7-2-2"
+        z-on-click="view.runSQL()"
+        class="btn btn-sm mb-2 w-100 btn-outline-light"
+      >
+        <span>Run SQL</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  id="mainContent"
+  class="main-content pt-1 pb-1 flex-grow-1 d-flex flex-column h-100 bg-light"
+>
+  <z-sub-view class="flex-grow-1"></z-sub-view>
+</div>
