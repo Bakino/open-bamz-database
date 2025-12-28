@@ -72,10 +72,15 @@ function prepareQueryArgs(query, params, typesByName, cleanArgs){
         }else if(typeOfArg?.kind === "ENUM" || ["Int", "Float",  "Boolean"].includes(typeOfArg?.name)){
             formattedValue = value ;
         }else{
-            if(value.includes("\n")){
-                formattedValue = `"""${value}"""` ;
+            if(typeof(value) === "object"){
+                //JSON
+                formattedValue = JSON.stringify(value).replace(/"(\w+)":/g, '$1:') ;
             }else{
-                formattedValue = `"${value.replaceAll('"', '\\"')}"` ;
+                if(value.includes("\n")){
+                    formattedValue = `"""${value}"""` ;
+                }else{
+                    formattedValue = `"${value.replaceAll('"', '\\"')}"` ;
+                }
             }
         }
         input.push(`${arg.name}: ${formattedValue}`)

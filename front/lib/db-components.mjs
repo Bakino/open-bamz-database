@@ -10,6 +10,7 @@ export async function loadCss (url){
         var link = document.createElement("link");
         link.rel = "stylesheet";
         link.type = "text/css";
+        link.crossOrigin = "anonymous" ;
         link.href = url;
         
         
@@ -17,6 +18,14 @@ export async function loadCss (url){
         resolve() ;
     }) ;
 }
+
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    // @ts-ignore
+    reader.onload = () => resolve(reader.result.substring(reader.result.indexOf("base64,")+"base64,".length));
+    reader.onerror = reject;
+});
 
 export const DbFieldExtensions = {
     extensions: [],
@@ -156,6 +165,42 @@ if(!customElements.get("db-field")){
                 const elHtmlEditor = document.createElement("DIV") ;
                 elHtmlEditor.id = el.id+"_input" ;
                 return elHtmlEditor ;
+            }else if (type==="bytea"){
+                const elBinary = /** @type {HTMLDivElement} */ (document.createElement("DIV")) ;
+                elBinary.style.display = "flex" ;
+                const elInfos = /** @type {HTMLDivElement} */ (document.createElement("DIV")) ;
+                elInfos.className = "bamz-binary-infos"
+                const elInput = /** @type {HTMLInputElement} */ (document.createElement("INPUT")) ;
+                elInput.id = el.id+"_input" ;
+                elInput.type = "file" ;
+                elInput.addEventListener("change", async ()=>{
+                    elInfos.innerHTML = "..."
+                    elInput.setCustomValidity("File is loading") ;
+                    try{
+                        const file = elInput.files[0];
+                        // @ts-ignore
+                        if(elInput.currentFile !== file){
+                            // @ts-ignore
+                            elInput.currentFile = file ;
+                            if(!file){
+                                elInfos.innerHTML = ""
+                                elInput.value = "" ;
+                            }else{
+                                elInfos.innerHTML = file.name+" ("+file.type+")" ;
+                                const base64 = await toBase64(file);
+                                // @ts-ignore
+                                elBinary.value = base64 ;
+                                elBinary.dispatchEvent(new Event("change", { bubbles: true })) ;
+                            }
+                        }
+                    }finally{
+                        elInput.setCustomValidity("") ;
+                    }
+                });
+
+                elBinary.appendChild(elInfos) ;
+                elBinary.appendChild(elInput) ;
+                return elBinary ;
             }else{
                 const elInput = /** @type {HTMLInputElement} */ (document.createElement("INPUT")) ;
                 elInput.id = el.id+"_input" ;
@@ -205,6 +250,13 @@ if(!customElements.get("db-field")){
                 if(type === "enum" && elInput.tagName === "DIV"){
                     //enum radio
                     return elInput.querySelector("input[type='hidden']").value ;
+                }
+                if(type === "bytea"){
+                    if(elInput.value){
+                        return elInput.value ; 
+                    }else{
+                        return null;
+                    }
                 }
                 if(elInput.type === "checkbox"){
                     return elInput.checked ;
@@ -441,8 +493,6 @@ if(!customElements.get("db-field")){
             }
             loadingDbFieldExtensions = true ;
             //console.log("start load db components extension")
-            // @ts-ignore
-            let promises = [] ;
             for(let ext of DbFieldExtensions.extensions){
                 if(ext.isLoaded){ continue ; }
                 ext.isLoaded = true ;
@@ -456,16 +506,14 @@ if(!customElements.get("db-field")){
                         DbField.loadExtension(ext) ;
                         //console.log("load extension", ext)
                         if(ext.customCss){
-                            // @ts-ignore
-                            return loadCss(ext.customCss) ;
+                            await loadCss(ext.customCss) ;
                         }
                     }
                 }else{
                     DbField.loadExtension(ext) ;
                     //console.log("load extension", ext)
                     if(ext.customCss){
-                        // @ts-ignore
-                        promises.push(loadCss(ext.customCss)) ;
+                        await loadCss(ext.customCss) ;
                     }
                 }
             }
@@ -487,7 +535,10 @@ if(!customElements.get("db-field")){
             }
             DbField.extension = {
                 ...DbField.extension,
-                ...extension
+                ...extension,
+                defaultExtension: {
+                    ...DbField.extension
+                }
             }
         }
 
@@ -808,7 +859,7 @@ if(!customElements.get("db-value")){
     let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 30 });
     //let decimalDisplayFormat = new Intl.NumberFormat(undefined,{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const DEFAULT_EXTENSION_VALUE = {       
+    const DEFAULT_VALUE_EXTENSION_VALUE = {       
         generateValueElement: async function({type, defaultExtension, dbApi}){
             const elValue = document.createElement("SPAN") ;
             elValue.className = "db-value-"+type ;
@@ -821,9 +872,9 @@ if(!customElements.get("db-value")){
                 const style = document.createElement("STYLE");
                 style.dataset.dbSpinner = "true" ;
                 style.innerHTML = `.bamz-db-spinner {
-                    width: 24px;
-                    height: 24px;
-                    border: 4px solid #FFF;
+                    width: 1rem;
+                    height: 1rem;
+                    border: 2px solid #FFF;
                     border-bottom-color: #98989882;
                     border-radius: 50%;
                     display: inline-block;
@@ -955,18 +1006,15 @@ if(!customElements.get("db-value")){
         ]
     }
 
-    let loadingValueFieldExtensions = false ;
-    const loadValueFieldExtensions = async function(){
+    let loadingValueExtensions = false ;
+    const loadValueExtensions = async function(){
         try{
-            if(loadingValueFieldExtensions){
+            if(loadingValueExtensions){
                 await new Promise((resolve)=>{ setTimeout(resolve, 100) ; }) ;
-                return await loadValueFieldExtensions() ;
+                return await loadValueExtensions() ;
             }
-            loadingValueFieldExtensions = true ;
-            //console.log("start load db components extension")
-            // @ts-ignore
-            let promises = [] ;
-            for(let ext of DbFieldExtensions.extensions){
+            loadingValueExtensions = true ;
+            for(let ext of DbValueExtensions.extensions){
                 if(ext.isLoaded){ continue ; }
                 ext.isLoaded = true ;
                 if(ext.url){
@@ -979,8 +1027,7 @@ if(!customElements.get("db-value")){
                         DbValue.loadExtension(ext) ;
                         //console.log("load extension", ext)
                         if(ext.customCss){
-                            // @ts-ignore
-                            return loadCss(ext.customCss) ;
+                            await loadCss(ext.customCss) ;
                         }
                     }
                 }else{
@@ -988,17 +1035,17 @@ if(!customElements.get("db-value")){
                     //console.log("load extension", ext)
                     if(ext.customCss){
                         // @ts-ignore
-                        promises.push(loadCss(ext.customCss)) ;
+                        await loadCss(ext.customCss) ;
                     }
                 }
             }
         }finally{
-            loadingValueFieldExtensions = false ;
+            loadingValueExtensions = false ;
         }
     }
 
     class DbValue extends HTMLElement {
-        static extension = DEFAULT_EXTENSION_VALUE ;
+        static extension = DEFAULT_VALUE_EXTENSION_VALUE ;
         static loadExtension(extension){
             //console.log("Load db field extension", extension) ;
             let postProcess = extension.postProcess ;
@@ -1008,13 +1055,17 @@ if(!customElements.get("db-value")){
             }
             DbValue.extension = {
                 ...DbValue.extension,
-                ...extension
+                ...extension,
+                defaultExtension: {
+                    ...DbValue.extension
+                }
             }
         }
 
         static CACHE_FORMATTED_VALUES = {} ;
 
         static async getFormattedValue({type, dbApi, app, schema, table, column, value}){
+            await loadValueExtensions() ;
             const cacheKey = JSON.stringify({app, schema: schema.schema_name, table: table.table_name, column: column.column_name, value}) ;
             let cacheEntry = DbValue.CACHE_FORMATTED_VALUES[cacheKey] ;
             if(cacheEntry && cacheEntry.cacheTime > Date.now()-5000){
@@ -1028,7 +1079,7 @@ if(!customElements.get("db-value")){
                 //not in cache or cache is too old
 
                 //prepare cache entry before starting formatting
-                const cachePromise = DbValue.extension.formatValue({type, dbApi, schema, column, value, defaultExtension: DEFAULT_EXTENSION_VALUE}) ; 
+                const cachePromise = DbValue.extension.formatValue({type, dbApi, schema, column, value, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE}) ; 
                 cacheEntry = {
                     formattedValue: cachePromise, //formatted is a promise, subsequent call will wait for it
                     cacheTime: Date.now()
@@ -1047,7 +1098,7 @@ if(!customElements.get("db-value")){
 
         static async renderDbValue({app, schema, table, column, value, elValue}){
             try{
-
+                await loadValueExtensions() ;
                 const dbApi = await getGraphqlClient(app) ;
     
                 const schemaObj = dbApi.schemas.find(s=>s.schema === (schema??"public")) ;
@@ -1073,14 +1124,14 @@ if(!customElements.get("db-value")){
 
                 
                 if(!elValue){
-                    elValue = await DbValue.extension.generateValueElement({type, defaultExtension: DEFAULT_EXTENSION_VALUE, dbApi }) ;
+                    elValue = await DbValue.extension.generateValueElement({type, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE, dbApi }) ;
                 }
                 elValue.innerHTML = "" ;
                 elValue.appendChild(await DbValue.extension.getSpinner()) ;
 
                 const formattedValue = await DbValue.getFormattedValue({type, dbApi, app, schema: schemaObj, table: tableObj, column: columnObj, value}) ;
 
-                DbValue.extension.setValue({type, elValue: elValue, value, formattedValue, defaultExtension: DEFAULT_EXTENSION_VALUE}) ;
+                DbValue.extension.setValue({type, elValue: elValue, value, formattedValue, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE}) ;
             }catch(err){
                 console.error("Error rendering db value", {app, schema, table, column, value, elValue}, err) ;
                 if(!elValue){
@@ -1170,13 +1221,13 @@ if(!customElements.get("db-value")){
             if(this._initDone){
                 let formattedValue = DbValue.extension.formatValue({
                     dbApi: this.dbApi, schema: this._schema, column: this._column,
-                    type: this._fieldType, value, defaultExtension: DEFAULT_EXTENSION_VALUE}) ;
+                    type: this._fieldType, value, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE}) ;
                 if(formattedValue instanceof Promise){
                     formattedValue.then(formattedValue=>{
-                        DbValue.extension.setValue({type: this._fieldType, elValue: this.elValue, value, formattedValue, defaultExtension: DEFAULT_EXTENSION_VALUE}) ;
+                        DbValue.extension.setValue({type: this._fieldType, elValue: this.elValue, value, formattedValue, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE}) ;
                     }) ;
                 }else{
-                    DbValue.extension.setValue({type: this._fieldType, elValue: this.elValue, value, formattedValue, defaultExtension: DEFAULT_EXTENSION_VALUE}) ;
+                    DbValue.extension.setValue({type: this._fieldType, elValue: this.elValue, value, formattedValue, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE}) ;
                 }
             }
         }
@@ -1185,7 +1236,7 @@ if(!customElements.get("db-value")){
     
         async init(){
 
-            await loadValueFieldExtensions() ;
+            await loadValueExtensions() ;
     
             let type = this.type ;
             let label = this.label;
@@ -1225,13 +1276,13 @@ if(!customElements.get("db-value")){
             this._table = table ;
     
             
-            const elValue = await DbValue.extension.generateValueElement({type, defaultExtension: DEFAULT_EXTENSION_VALUE, dbApi: this.dbApi }) ;
+            const elValue = await DbValue.extension.generateValueElement({type, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE, dbApi: this.dbApi }) ;
             this.elValue = elValue ;
             this.innerHTML = "" ;
-            await DbValue.extension.appendElements({label, type, schema, table, column, el: this, elValue: elValue, defaultExtension: DEFAULT_EXTENSION_VALUE, dbApi: this.dbApi}) ;
+            await DbValue.extension.appendElements({label, type, schema, table, column, el: this, elValue: elValue, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE, dbApi: this.dbApi}) ;
     
             for(let postProcess of DbValue.extension.postProcesses){
-                await postProcess({label, type, schema, table, column, el: this, elValue, defaultExtension: DEFAULT_EXTENSION_VALUE, dbApi: this.dbApi}) ;
+                await postProcess({label, type, schema, table, column, el: this, elValue, defaultExtension: DEFAULT_VALUE_EXTENSION_VALUE, dbApi: this.dbApi}) ;
             }
     
             this._initDone = true;

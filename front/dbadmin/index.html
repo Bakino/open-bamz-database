@@ -20,18 +20,18 @@
 <body>
     
     <script type="module">
-        import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/viewz.mjs" ;
-        import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@b2597bbb965046b0bf48c0ef20324e3c4058331c/lib/frameworkz.mjs" ;
+        import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@4ac79358280cc347135f39b78839552a381f518f/lib/viewz.mjs" ;
+        import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@4ac79358280cc347135f39b78839552a381f518f/lib/frameworkz.mjs" ;
         import { AgGridExtensions } from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-ag-grid@latest/front/lib/ag-grid-extension.mjs" ;
         
         import { DbFieldExtensions, DbValueExtensions } from "/plugin/open-bamz-database/lib/db-components.mjs" ;
 
         DbFieldExtensions.loadExtension({
-            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@d832962ece8d4c71b9727f80e86fd6a6ee61765a/front/lib/db-components-bootstrap5.mjs`,
+            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@a803284221e8a17cf0bc5df9167fee1a9e346ca1/front/lib/db-components-bootstrap5.mjs`,
         }) ;
         
         DbValueExtensions.loadExtension({
-            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@d832962ece8d4c71b9727f80e86fd6a6ee61765a/front/lib/db-values-bootstrap5.mjs`,
+            url: `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-bootstrap@a803284221e8a17cf0bc5df9167fee1a9e346ca1/front/lib/db-values-bootstrap5.mjs`,
         }) ;
 
         AgGridExtensions.loadExtension({
@@ -88,6 +88,7 @@
                 group: "Binary",
                 types: [
                     { value: "bytea", label: "Binary string (buffer)", link: "https://www.postgresql.org/docs/current/datatype-binary.html"},
+                    { value: "bamz_binary", label: "Binary storage"},
                 ]
             },
             {

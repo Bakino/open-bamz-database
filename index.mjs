@@ -1094,7 +1094,7 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
             if(await hasCurrentPlugin(appName)){
             
                 let appContext = await contextOfApp(appName) ;
-                let allowedExtensions = appContext.pluginsData["dbadmin"]?.pluginSlots?.dbFieldsExtensions??[] ;
+                let allowedExtensions = appContext.pluginsData["open-bamz-database"]?.pluginSlots?.dbFieldsExtensions??[] ;
                 let js = `let extensions = [];`;
                 for(let i=0; i<allowedExtensions.length; i++){
                     let ext = allowedExtensions[i];
@@ -1118,7 +1118,7 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
             if(await hasCurrentPlugin(appName)){
             
                 let appContext = await contextOfApp(appName) ;
-                let allowedExtensions = appContext.pluginsData["dbadmin"]?.pluginSlots?.dbValuesExtensions??[] ;
+                let allowedExtensions = appContext.pluginsData["open-bamz-database"]?.pluginSlots?.dbValuesExtensions??[] ;
                 let js = `let extensions = [];`;
                 for(let i=0; i<allowedExtensions.length; i++){
                     let ext = allowedExtensions[i];
