@@ -627,6 +627,7 @@ export const initPlugin = async ({ loadPluginData, graphql, hasCurrentPlugin, co
         if(finalType.name === "String"){ typeName = "string" ; }
         if(finalType.name === "Cursor"){ typeName = "string" ; }
         if(finalType.name === "Int"){ typeName = "number" ; }
+        if(finalType.name === "Float"){ typeName = "number" ; }
         if(finalType.name === "Boolean"){ typeName = "boolean" ; }
         if(finalType.name === "Datetime"){ typeName = "Date" ; }
         if(finalType.list){
