@@ -171,17 +171,19 @@ class GraphqlClient {
         await cb(clone) ;
         const originalRecordById = {} ;
         for(let params of clone.db.transactionRecords){
-            originalRecordById [params.id] = params.record ;
-            const [schemaName, tableName] = params.table_name.split(".") ;
-            const cleanRecord = {} ;
-            const schema = this.schemas.find(s=>s.schema === schemaName) ;
-            if(schema){
-                const table = schema.tables.find(t=>t.table_name === tableName) ;
-                if(table){
-                    for(let c of table.columns){
-                        cleanRecord[c.column_name] = params.record[c.column_name] ;
+            if(params.record){
+                originalRecordById [params.id] = params.record ;
+                const [schemaName, tableName] = params.table_name.split(".") ;
+                const cleanRecord = {} ;
+                const schema = this.schemas.find(s=>s.schema === schemaName) ;
+                if(schema){
+                    const table = schema.tables.find(t=>t.table_name === tableName) ;
+                    if(table){
+                        for(let c of table.columns){
+                            cleanRecord[c.column_name] = params.record[c.column_name] ;
+                        }
+                        params.record = cleanRecord;
                     }
-                    params.record = cleanRecord;
                 }
             }
         }
