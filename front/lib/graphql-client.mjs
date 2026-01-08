@@ -51,11 +51,11 @@ function prepareQueryArgs(query, params, typesByName, cleanArgs){
                 if(arg?.type?.kind === "LIST" && Array.isArray(value)){
                     let formattedValues = [] ;
                     for(let v of value){
-                        formattedValues.push(`{ ${prepareQueryArgs({args: type.inputFields}, v, typesByName).join(",")} }`);
+                        formattedValues.push(`{ ${prepareQueryArgs({name: query.name + " > "+type.name, args: type.inputFields}, v, typesByName).join(",")} }`);
                     }
                     formattedValue = `[${formattedValues.join(",")}]` ;
                 }else{
-                    formattedValue = `{ ${prepareQueryArgs({args: type.inputFields}, value, typesByName).join(",")} }`;
+                    formattedValue = `{ ${prepareQueryArgs({name: query.name + " > "+type.name, args: type.inputFields}, value, typesByName).join(",")} }`;
                 }
             }else{
                 formattedValue = JSON.stringify(value).replace(/"(\w+)":/g, '$1:') ;
