@@ -6,12 +6,15 @@ import express from 'express';
  * 
  * Use it to prepare the database and files needed by the plugin
  */
-export const prepareDatabase = async ({options, client, grantSchemaAccess}) => {
+export const prepareDatabase = async ({options, client, grantSchemaAccess, logger}) => {
+    logger.info(`CREATE SCHEMA IF NOT EXISTS dbadmin`); 
     await client.query(`CREATE SCHEMA IF NOT EXISTS dbadmin`); 
 
+    logger.info(`drop function if exists dbadmin.run_query`) ;
     await client.query(`drop function if exists dbadmin.run_query`) ;
 
     // plain run query
+    logger.info(`create or replace function dbadmin.run_query`)
     await client.query(`create or replace function dbadmin.run_query(
   query text
 )
@@ -25,8 +28,10 @@ $$
 $$
 LANGUAGE "plv8"`) ;
 
+    logger.info(`drop function if exists dbadmin.run_queries`) ;
     await client.query(`drop function if exists dbadmin.run_queries`) ;
 
+    logger.info(`create function dbadmin.run_queries`);
     await client.query(`create function dbadmin.run_queries(
     queries text[]
   )
@@ -54,7 +59,9 @@ LANGUAGE "plv8"`) ;
   LANGUAGE "plv8"`) ;
 
     // get list of schemas and tables
+    logger.info(`DROP FUNCTION IF EXISTS dbadmin.get_schemas_and_tables`) 
     await client.query(`DROP FUNCTION IF EXISTS dbadmin.get_schemas_and_tables`) 
+    logger.info(`CREATE FUNCTION dbadmin.get_schemas_and_tables()`)
     await client.query(`CREATE FUNCTION dbadmin.get_schemas_and_tables()
 RETURNS JSONB AS
 $$
@@ -198,8 +205,10 @@ $$ LANGUAGE plpgsql;
 
     
 
+    logger.info(`DROP FUNCTION IF EXISTS dbadmin.get_table_metadata`) 
     await client.query(`DROP FUNCTION IF EXISTS dbadmin.get_table_metadata`) 
 
+    logger.info(`create function dbadmin.get_table_metadata`) 
     await client.query(`create function dbadmin.get_table_metadata(
     p_schema text,
     p_table text
@@ -509,8 +518,10 @@ ORDER BY pg_catalog.pg_get_expr(c.relpartbound, c.oid) = 'DEFAULT', c.oid::pg_ca
 
 
   
+    logger.info(`DROP FUNCTION IF EXISTS dbadmin.get_function_metadata`) 
     await client.query(`DROP FUNCTION IF EXISTS dbadmin.get_function_metadata`) 
 
+    logger.info(`create function dbadmin.get_function_metadata`)
     await client.query(`create function dbadmin.get_function_metadata(
   p_schema text,
   p_func text
@@ -581,12 +592,14 @@ $$
 $$
 LANGUAGE "plv8"`) ;
 
-
+    logger.info("grantSchemaAccess")
     await grantSchemaAccess("dbadmin", [
         {role: "admin", level: "admin"},
         {role: "user", level: "none"},
         {role: "readonly", level: "none"},
     ]) ;
+
+    logger.info("finished")
 
 }
 
@@ -1139,37 +1152,37 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
 
 
     loadPluginData(async ({pluginsData})=>{
-        if(pluginsData?.["viewz"]?.pluginSlots?.bindzFormatters){
-            pluginsData?.["viewz"]?.pluginSlots?.bindzFormatters.push( {
-                plugin: "dbadmin",
-                formatterPath: "/plugin/dbadmin/lib/bindz-formatter-db-value.mjs",
+        if(pluginsData?.["open-bamz-viewz"]?.pluginSlots?.bindzFormatters){
+            pluginsData?.["open-bamz-viewz"]?.pluginSlots?.bindzFormatters.push( {
+                plugin: "open-bamz-database",
+                formatterPath: "/plugin/open-bamz-database/lib/bindz-formatter-db-value.mjs",
                 "d.ts": `declare const dbApi: GraphqlClient;`
             })
         }
-        if(pluginsData?.["viewz"]?.pluginSlots?.viewzExtensions){
-            pluginsData?.["viewz"]?.pluginSlots?.viewzExtensions.push( {
-                plugin: "dbadmin",
-                extensionPath: "/plugin/dbadmin/lib/viewz-dbadmin.mjs",
+        if(pluginsData?.["open-bamz-viewz"]?.pluginSlots?.viewzExtensions){
+            pluginsData?.["open-bamz-viewz"]?.pluginSlots?.viewzExtensions.push( {
+                plugin: "open-bamz-database",
+                extensionPath: "/plugin/open-bamz-database/lib/viewz-dbadmin.mjs",
                 "d.ts": `declare const dbApi: GraphqlClient;`
             })
         }
         if(pluginsData?.["code-editor"]?.pluginSlots?.javascriptApiDef){
             pluginsData?.["code-editor"]?.pluginSlots?.javascriptApiDef.push( {
-                plugin: "dbadmin",
-                url: "/dbadmin/definitions/db-lib.d.ts"
+                plugin: "open-bamz-database",
+                url: "/open-bamz-database/definitions/db-lib.d.ts"
             })
         }
         if(pluginsData?.["grapesjs-editor"]?.pluginSlots?.grapesJsEditor){
             pluginsData?.["grapesjs-editor"]?.pluginSlots?.grapesJsEditor.push( {
                 plugin: "dbfield",
                 depends: ["ag-grid"],
-                extensionPath: "/plugin/dbadmin/editor/grapesjs-dbfield-extension.mjs"
+                extensionPath: "/plugin/open-bamz-database/editor/grapesjs-dbfield-extension.mjs"
             })
         }
-        if(pluginsData?.["ag-grid"]?.pluginSlots?.agGridExtensions){
-            pluginsData?.["ag-grid"]?.pluginSlots?.agGridExtensions.push( {
-                plugin: "dbadmin",
-                extensionPath: "/plugin/dbadmin/lib/ag-grid-dbadmin.mjs"
+        if(pluginsData?.["open-bamz-ag-grid"]?.pluginSlots?.agGridExtensions){
+            pluginsData?.["open-bamz-ag-grid"]?.pluginSlots?.agGridExtensions.push( {
+                plugin: "open-bamz-database",
+                extensionPath: "/plugin/open-bamz-database/lib/ag-grid-dbadmin.mjs"
             })
         }
     })
