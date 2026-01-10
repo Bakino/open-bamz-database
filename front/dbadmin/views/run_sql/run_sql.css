@@ -13,3 +13,6 @@
   white-space-collapse: collapse;
   text-wrap-mode: nowrap;
 }
+.run-sql-container {
+  min-height: 500px;
+}

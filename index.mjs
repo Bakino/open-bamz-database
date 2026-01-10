@@ -547,7 +547,8 @@ $$
                 pg_get_functiondef(p.oid) as definition,
                 pg_get_function_identity_arguments(p.oid) as arguments,
                 pg_get_function_result(p.oid) as result,
-                p.proname 
+                p.proname,
+                p.prosecdef as is_security_definer 
             FROM pg_catalog.pg_namespace n
             JOIN pg_catalog.pg_proc p ON 
                 p.pronamespace = n.oid AND
@@ -587,6 +588,7 @@ $$
     funcMeta.full_arguments = result[0].full_arguments;
     funcMeta.result = result[0].result;
     funcMeta.definition = result[0].definition;
+    funcMeta.is_security_definer = result[0].is_security_definer;
 
     return funcMeta;
 $$
@@ -1037,18 +1039,18 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
 
             for(let [schema, tableDef] of Object.entries(sourcesDb)){
                 for(let [table, sourceTable] of Object.entries(tableDef)){
-                    source += `declare class GraphqlClientDbTable_${table} {\n\n` ;
+                    source += `declare class GraphqlClientDbTable_${schema}_${table} {\n\n` ;
                     source += sourceTable ;
                     source += `}\n\n`;
                     
                     if(schema === "public"){
-                        sourceClassDb += `  ${table}: GraphqlClientDbTable_${table};\n\n` ;
+                        sourceClassDb += `  ${table}: GraphqlClientDbTable_${schema}_${table};\n\n` ;
                     }
                 }
                 if(schema !== "public"){
                     source += `declare class GraphqlClientDbSchema_${schema} {\n\n` ;
                     for(let table of Object.keys(tableDef)){
-                        source += `  ${table}: GraphqlClientDbTable_${table};\n\n` ;
+                        source += `  ${table}: GraphqlClientDbTable_${schema}_${table};\n\n` ;
                     }
                     source += `  queries: GraphqlClientQueries_${schema};\n\n` ;
                     source += `  mutations: GraphqlClientMutations_${schema};\n\n` ;
@@ -1057,8 +1059,8 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
 
                     sourceClassDb += `  ${schema}: GraphqlClientDbSchema_${schema};\n\n` ;
                 }else{
-                    source += `  queries: GraphqlClientQueries_${schema};\n\n` ;
-                    source += `  mutations: GraphqlClientMutations_${schema};\n\n` ;
+                    sourceClassDb += `  queries: GraphqlClientQueries_${schema};\n\n` ;
+                    sourceClassDb += `  mutations: GraphqlClientMutations_${schema};\n\n` ;
                 }
 
             }

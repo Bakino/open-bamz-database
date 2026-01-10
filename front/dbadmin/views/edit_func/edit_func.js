@@ -15,6 +15,7 @@ view.loader = async ()=>{
     let result = null;
     let args = [] ;
     let metadata = null;
+    let runAsAdmin = false;
 
     if(view.route.params.func){
         func = view.route.params.func;
@@ -23,6 +24,7 @@ view.loader = async ()=>{
         result = metadata.result;
         language = metadata.language;
         funcBody = metadata.definition ;
+        runAsAdmin = metadata.is_security_definer ;
         const indexStartFunction = funcBody.indexOf(FUNCTION_DELIMITER) ;
         if(indexStartFunction!==-1){
             funcBody = funcBody.substring(indexStartFunction+FUNCTION_DELIMITER.length, funcBody.lastIndexOf(FUNCTION_DELIMITER)).trim() ;
@@ -43,7 +45,8 @@ view.loader = async ()=>{
         func: func,
         language: language,
         result: result,
-        isModify: !!view.route.params.func
+        isModify: !!view.route.params.func,
+        runAsAdmin
     }
 
     return data;
@@ -78,7 +81,7 @@ RETURNS ${view.data.result} AS
 ${FUNCTION_DELIMITER}
 ${view.data.funcBody}
 ${FUNCTION_DELIMITER}
-LANGUAGE "${view.data.language}";
+LANGUAGE "${view.data.language}" ${view.data.runAsAdmin?"SECURITY DEFINER":""};
 
 COMMENT ON FUNCTION "${view.data.schema}"."${view.data.func}" IS '${(view.data.funcName??"").replaceAll("'", "''")}';
 
