@@ -180,7 +180,11 @@ class GraphqlClient {
                     const table = schema.tables.find(t=>t.table_name === tableName) ;
                     if(table){
                         for(let c of table.columns){
-                            cleanRecord[c.column_name] = params.record[c.column_name] ;
+                            if(c.data_type === "bamz_binary" && params.record[c.column_name]){
+                                cleanRecord[c.column_name] = JSON.stringify(params.record[c.column_name]) ;
+                            }else{
+                                cleanRecord[c.column_name] = params.record[c.column_name] ;
+                            }
                         }
                         params.record = cleanRecord;
                     }
@@ -344,12 +348,19 @@ class GraphqlClient {
             if(query.name === "query" || query.name === "nodeId" || query.name === "node"){
                 continue;
             }
-            this.queries[query.name] = async function(params={}, output=null){
+            this.queries[query.name] = async function(params={}, output=null, joins=null){
                 const input = prepareQueryArgs(query, params, typesByName) ;
 
                 if(!output){
                     output = {} ;
                     prepareQueryOutput(output, query.type.name,typesByName, 0)
+                }
+                if(joins){
+                    for(let join of joins){
+                        const joinOutput = {};
+                        prepareQueryOutput(joinOutput, join.table+"Connection",typesByName, 0) ;
+                        output.nodes[join.table+"_by_"+join.field] = joinOutput.nodes ;
+                    }
                 }
 
 
@@ -428,7 +439,7 @@ class GraphqlClient {
                         if(this.isTransaction){ throw "Search is not supported in transaction" ; }
                         let params = { filter: structuredClone(filter)} ;
                         for(let [key, value] of Object.entries(searchParams)){
-                            if(key !== "output"){
+                            if(key !== "output" && key !== "joins"){
                                 params[key] = value ;
                             }
                         }
@@ -446,7 +457,7 @@ class GraphqlClient {
                         if(Object.keys(params.filter).length === 0){
                             delete params.filter ;
                         }
-                        let result = await self.queries["all_"+fullTable](params, searchParams.output) ;
+                        let result = await self.queries["all_"+fullTable](params, searchParams.output, searchParams.joins) ;
                         return { results: result.nodes, totalCount: result.totalCount} ;
                     }
 
