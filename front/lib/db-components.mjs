@@ -18,6 +18,67 @@ export async function loadCss (url){
         resolve() ;
     }) ;
 }
+function attrNameToPropertyName(att){
+    return att.split("-").map((v, i)=>{
+        if(i>0){
+            return v.substring(0,1).toUpperCase()+v.substring(1) ;
+        }else{
+            return v ;
+        }
+    }).join("") ;
+}
+
+function attributesToOptions(element, options, prefix){
+    for(let attr of element.attributes){
+        if(!attr.name.startsWith(prefix)){ continue; }
+        const propertyName = attrNameToPropertyName(attr.name.substring(prefix.length));
+        let attrValue = element[propertyName];
+        if(attrValue == null){
+            attrValue = element.getAttribute(attr.name);
+        }
+        if(typeof(attrValue) === "string"){
+            // the attribute value is a string, check if it is a component name
+            let componentName = attrValue ;
+            let componentParams = null;
+            if(attrValue.includes("(")){
+                //component can have parameters like this MyComponent({param1: "value1", param2: "value2"})
+                componentName = componentName.substring(0, attrValue.indexOf("("));
+            }
+        }
+        if(attrValue === ""){
+            // if the attribute value is empty, set it to true
+            attrValue = true ;
+        }
+        if(attrValue === "true"){
+            attrValue = true;
+        }else if(attrValue === "false"){
+            attrValue = false;
+        }else if(attrValue && 
+            (
+                (attrValue.startsWith("{") && attrValue.endsWith("}")) ||
+                (attrValue.startsWith("[") && attrValue.endsWith("]"))
+            )
+        ){
+            //try to parse JSON
+            try{
+                attrValue = JSON.parse(attrValue) ;
+            }catch(e){
+                //malformatted JSON, keep the string value
+            }
+        }
+
+        const optPath = propertyName.split(".") ;
+        let optObject = options;
+        while(optPath.length>1){
+            const p = optPath.shift() ;
+            if(!optObject[p]){
+                optObject[p] = {} ;
+            }
+            optObject = optObject[p] ;
+        }
+        optObject[optPath.shift()] = attrValue ;
+    }
+}
 
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -107,7 +168,7 @@ if(!customElements.get("db-field")){
                             elRadio.addEventListener("change", ()=>{
                                 if(elRadio.checked){
                                     elInputHidden.value = elRadio.value ;
-                                    elDiv.dispatchEvent(new Event("change")) ;
+                                    elDiv.dispatchEvent(new Event("change", { bubbles: true })) ;
                                 }
                             }) ;
                         }
@@ -268,11 +329,14 @@ if(!customElements.get("db-field")){
     
         setValue: function({el, type, elInput, value, defaultExtension /*label, type, schema, table,column, el, elLabel, elInput, value*/}){
             if(elInput){
+                if(value===null || value===undefined){
+                    value = "" ;
+                }
                 if(type === "enum" && elInput.tagName === "DIV"){
                     //enum radio
                     const elInputHidden = elInput.querySelector("input[type='hidden']");
                     elInputHidden.value = value;
-                    elInputHidden.dispatchEvent(new Event("change")) ;
+                    elInputHidden.dispatchEvent(new Event("change", { bubbles: true })) ;
                 }
                 if(elInput.type === "checkbox"){
                     elInput.checked = value ;
@@ -323,7 +387,23 @@ if(!customElements.get("db-field")){
                     }else{
                         elInput.choice.enable() ;
                     }
+                }else if(elInput.quill){
+                    if(readOnly){
+                        elInput.quill.disable() ;
+                        const toolbar = elInput.quill.getModule('toolbar');
+                        if (toolbar?.container) {
+                            toolbar.container.style.display = 'none';
+                        }
+                    }else{
+                        elInput.quill.enable() ;
+                        const toolbar = elInput.quill.getModule('toolbar');
+                        if (toolbar?.container) {
+                            toolbar.container.style.display = '';
+                        }
+                    }
                 }else if(elInput.tagName === "SELECT"){
+                    elInput.disabled = readOnly;
+                }else if(elInput.tagName === "INPUT" && (elInput.type === "radio" || elInput.type === "checkbox")){
                     elInput.disabled = readOnly;
                 }else{
                     elInput.readOnly = readOnly;
@@ -457,23 +537,30 @@ if(!customElements.get("db-field")){
 
                 }else if(type === "html"){
                     // @ts-ignore
-                    const Quill = (await import("'https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm'")).default ;
+                    const Quill = (await import("https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm")).default ;
                     await loadCss("https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css");
-                    const quill = new Quill(elInput, {
+                    const optionsQuill = {
                         theme: 'snow',
                         placeholder: placeholder||label||""
-                    });
-                    elInput.quill = elInput ;
+                    } ;
+                    attributesToOptions(el, optionsQuill, "quill-") ;
+                    const quill = new Quill(elInput, optionsQuill);
+                    elInput.quill = quill ;
 
-                     quill.addEventListener('text-change', () => {
-                        elInput.dispatchEvent(new Event("change")) ;
+                    quill.on('text-change', (delta, oldDelta, source) => {
+                        if(source === "api"){ return ; }
+                        elInput.dispatchEvent(new Event("change", { bubbles: true }) );
                     });
                     Object.defineProperty(elInput, 'value', {
                         get() {
-                            return quill.root.innerHTML;
+                            const htmlContents = quill.getSemanticHTML();
+                            if(htmlContents === "<p></p>"){
+                                return "" ;
+                            }
+                            return htmlContents ;
                         },
                         set(value) {
-                            const delta = quill.clipboard.convert(value??"");
+                            const delta = quill.clipboard.convert({ html: value??"" });
                             quill.setContents(delta);
                         },
                         configurable: true // Make sure the property can be redefined or deleted
@@ -753,7 +840,9 @@ if(!customElements.get("db-field")){
                     label = await DbField.extension.generateLabelString({schema, table, column, el: this, defaultExtension: DEFAULT_EXTENSION, dbApi: this.dbApi}) ;
                 }
                 
-                if(column.data_type === "character varying" || column.data_type === "character" || column.data_type === "text"){
+                if(column.reference){
+                    type = "reference" ; 
+                } else if(column.data_type === "character varying" || column.data_type === "character" || column.data_type === "text"){
                     type = "text" ;
                 } else if(column.data_type === "boolean"){
                     type = "boolean" ;
@@ -765,8 +854,6 @@ if(!customElements.get("db-field")){
                     type = "integer" ; 
                 } else if(column.data_type === "decimal"  || column.data_type === "numeric" || column.data_type === "real" || column.data_type === "double precision" || column.data_type === "money"){
                     type = "decimal" ; 
-                } else if(column.reference){
-                    type = "reference" ; 
                 } else{
                     type =column.data_type ; 
                 }
