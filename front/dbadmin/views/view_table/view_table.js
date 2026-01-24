@@ -242,7 +242,7 @@ let numberFormat = new Intl.NumberFormat();
 let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 30 });
 let decimalDisplayFormat = new Intl.NumberFormat(undefined,{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 let grid = null;
-view.addEventListener("displayed", ()=>{
+async function createGrid(){
     const gridOptions = {
         rowModelType: "infinite",
         defaultColDef: {
@@ -514,7 +514,11 @@ view.addEventListener("displayed", ()=>{
     const gridElement = /** @type HTMLElement */ (view.querySelector('#grid'));
     // @ts-ignore
     grid = agGrid.createGrid(gridElement, gridOptions);
-});
+}
+
+view.displayed = async ()=>{
+    await createGrid() ;
+}
 
 function formatValue(colName, value){
     let col = view.data.metadata.columns.find(c=>c.code === colName) ;
@@ -526,8 +530,9 @@ function formatValue(colName, value){
     }
 }
 
-view.refresh = async ()=>{
-    grid.refreshInfiniteCache() ;
+view.refreshed = async ()=>{
+    grid.destroy() ;
+    await createGrid() ;
 }
 
 view.deleteRows = async ()=>{

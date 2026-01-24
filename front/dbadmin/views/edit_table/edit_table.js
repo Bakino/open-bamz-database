@@ -62,7 +62,7 @@ view.addRow = ()=>{
 }
 //remove a column
 view.removeRow = (column)=>{
-    let index = view.data.columns.indexOf(column) ;
+    const index = view.data.columns.findIndex(c=>c.code === column.code)
     view.data.columns.splice(index, 1) ;
 }
 
@@ -213,6 +213,11 @@ DROP TYPE "${data.schema}"."${originalCol.pgType}";\n`
                 }
                 change+=` TYPE ${typeOfCol}${col.precision?`(${col.precision})`:""}`;
             }
+            if(col.type === "reference"){
+                if(originalCol.referenced_table && (originalCol.referenced_table !== col.referenced_table || originalCol.referenced_column !== col.referenced_column)){
+                    change+=` TYPE ${col.referencedType}`;
+                }
+            }
 
             if(originalCol.defaultValue !== col.defaultValue){
                 if(col.defaultValue){
@@ -256,6 +261,7 @@ DROP TYPE "${data.schema}"."${originalCol.pgType}";\n`
                     FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table}" ("${col.referenced_column}");\n`;
             }
 
+            changedColDescriptions.push(`COMMENT ON COLUMN  "${data.schema}"."${data.table}"."${col.code}" IS '${(col.description??"").replaceAll("'", "''")}' ;`)
         }
         for(let change of changedColumns){
             const col = change.col ;
@@ -267,7 +273,8 @@ DROP TYPE "${data.schema}"."${originalCol.pgType}";\n`
             }
             sql += `ALTER TABLE "${data.schema}"."${data.table}" ALTER COLUMN ${change.change};\n` ;
             if(col.type === "reference"){
-                sql += `ALTER TABLE "${data.schema}"."${data.table}" DROP CONSTRAINT "fk_${data.table}_${col.code}" ;\n`;
+                sql += `ALTER TABLE "${data.schema}"."${data.table}" ADD CONSTRAINT "fk_${data.table}_${col.code}" 
+                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table}" ("${col.referenced_column}");\n`;
             }
         }
         for(let col of removedColumns){
@@ -331,7 +338,7 @@ view.runSql = async()=>{
     view.refresh() ;
 }
 
-view.addEventListener("displayed", ()=>{
+view.displayed = async ()=>{
     let updateFromGrid = false;
 
     //prepare grid of all columns
@@ -404,6 +411,7 @@ view.addEventListener("displayed", ()=>{
                             ).join("")}
                         </select>
                         <select class="form-control select-column" z-bind="referenced_column">
+                           <option value="">Choose column</option>
                         </select>
                     </div>
                     `,
@@ -466,14 +474,18 @@ view.addEventListener("displayed", ()=>{
     gridApi = agGrid.createGrid(gridElement, gridOptions);
 
     //auto refresh grid contents
-    view.addDataListener("columns.*", ()=>{
+    function onColumnsChange(){
         if(updateFromGrid){
             updateFromGrid = false;
         }else{
             gridApi.setGridOption("rowData", view.data.columns);
         }
         computeSql() ;
-    });
+    }
+    view.addDataListener("columns.*.*", onColumnsChange);
+    view.addDataListener("columns.*.*.*", onColumnsChange);
+    view.addDataListener("columns.*.*.*.*", onColumnsChange);
+    view.addDataListener("columns.*.*.*.*.*", onColumnsChange);
     view.addDataListener("columns.length", ()=>{
         gridApi.setGridOption("rowData", view.data.columns);
         computeSql() ;
@@ -516,5 +528,18 @@ view.addEventListener("displayed", ()=>{
     if(!view.data.isModify){
         view.getElementById("tableName").focus() ;
     }
+
+    view.addEventListener("viewz-cell-rendered", (ev)=>{
+        // @ts-ignore
+        if(ev.detail?.data?.type === "reference"){
+            // @ts-ignore
+            const selectElm = ev.detail.element.querySelector(".select-table") ;
+            if(selectElm){
+                // @ts-ignore
+                view.changeReferencedTable(ev.detail.data, ev.detail.element.querySelector(".select-table")) ;
+            }
+        }
+        console.log("viewz-cell-rendered", ev) ;
+    }) ;
     
-});
+}
