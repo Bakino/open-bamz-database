@@ -20,8 +20,8 @@
 <body>
     
     <script type="module">
-        import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@4ac79358280cc347135f39b78839552a381f518f/lib/viewz.mjs" ;
-        import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@4ac79358280cc347135f39b78839552a381f518f/lib/frameworkz.mjs" ;
+        import { ViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@574bca480486664cf59f30437f1c3c71f204f7bc/lib/viewz.mjs" ;
+        import { startViewZ } from "https://cdn.jsdelivr.net/gh/Bakino/viewz@574bca480486664cf59f30437f1c3c71f204f7bc/lib/frameworkz.mjs" ;
         import { AgGridExtensions } from "https://cdn.jsdelivr.net/gh/Bakino/open-bamz-ag-grid@latest/front/lib/ag-grid-extension.mjs" ;
         
         import { DbFieldExtensions, DbValueExtensions } from "/plugin/open-bamz-database/lib/db-components.mjs" ;
@@ -35,7 +35,7 @@
         }) ;
 
         AgGridExtensions.loadExtension({
-            url : `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@latest/front/lib/ag-grid-viewz.mjs`
+            url : `https://cdn.jsdelivr.net/gh/Bakino/open-bamz-viewz@1227855610c6502f9e7d79c3fab55cee1bda475c/front/lib/ag-grid-viewz.mjs`
         }) ;
         AgGridExtensions.loadExtension({
             url : `${window.location.origin}/plugin/open-bamz-database/lib/ag-grid-dbadmin.mjs`
@@ -63,6 +63,11 @@
                 group: "Text",
                 types: [
                     { value: "text", label: "Text (string)", link: "https://www.postgresql.org/docs/current/datatype-character.html"},
+                    { value: "multiline", label: "Text (multiline)"},
+                    { value: "email", label: "E-mail", link: "https://dba.stackexchange.com/a/165923"},
+                    { value: "phone", label: "Phone number"},
+                    { value: "color", label: "Color"},
+                    { value: "html", label: "HTML"},
                     { value: "bpchar", label: "Text trimmed (string)", link: "https://www.postgresql.org/docs/current/datatype-character.html"},
                     { value: "character varying", label: "Text with limit (varchar)", precision: ["length"], link: "https://www.postgresql.org/docs/current/datatype-character.html"},
                 ]
@@ -79,6 +84,12 @@
                 ]
             },
             {
+                group: "Enumeration",
+                types: [
+                    { value: "enum", label: "Enumeration", link: "https://www.postgresql.org/docs/current/datatype-enum.html"},
+                ]
+            },
+            {
                 group: "Boolean",
                 types: [
                     { value: "boolean", label: "Boolean", link: "https://www.postgresql.org/docs/current/datatype-boolean.html"},
@@ -89,6 +100,12 @@
                 types: [
                     { value: "bytea", label: "Binary string (buffer)", link: "https://www.postgresql.org/docs/current/datatype-binary.html"},
                     { value: "bamz_binary", label: "Binary storage"},
+                ]
+            },
+            {
+                group: "Reference",
+                types: [
+                    { value: "reference", label: "Link to other table", link: "https://www.postgresql.org/docs/17/ddl-constraints.html#DDL-CONSTRAINTS-FK"},
                 ]
             },
             {
