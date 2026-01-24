@@ -222,7 +222,7 @@ export default {
      *   - dbTable / db-table : the table name (required)
      *   - dbColumn / db-column : the column name (required)
      */
-    columnOptionsTransformer: async function({ options }){
+    columnOptionsTransformer: async function({ options, agGridBamzComponents }){
         if(options.dbColumn){
             const appName = options.dbApp ;
             const schemaName = options.dbSchema ;
@@ -265,7 +265,7 @@ export default {
             //https://www.ag-grid.com/javascript-data-grid/value-formatters/
             let valueFormatter = undefined;
             // @ts-ignore
-            const cellRenderer = window.agGridBamzComponents.CopyRenderer ;
+            const cellRenderer = agGridBamzComponents.CopyRenderer ;
             const cellRendererParams=  {
                 cellRenderer : params => {
                     const elValue = document.createElement("SPAN") ;
