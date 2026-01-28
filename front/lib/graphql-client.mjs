@@ -357,9 +357,23 @@ class GraphqlClient {
                 }
                 if(joins){
                     for(let join of joins){
-                        const joinOutput = {};
-                        prepareQueryOutput(joinOutput, join.table+"Connection",typesByName, 0) ;
-                        output.nodes[join.table+"_by_"+join.field] = joinOutput.nodes ;
+                        
+                        const joinField = typesByName[getFinalType(typesByName[query.type.name]?.fields?.find(f=>f.name === "nodes").type)?.name]?.fields?.find(f=>f.name === join.table+"_by_"+join.field)
+                        if(joinField){
+                            if(joinField.type.kind === "OBJECT"){
+                                //single object
+                                const joinOutput = {};
+                                prepareQueryOutput(joinOutput, join.table+"Connection",typesByName, 0) ;
+                                output.nodes[join.table+"_by_"+join.field] = joinOutput.nodes ;
+                            }else{
+                                //list
+                                const joinOutput = {};
+                                prepareQueryOutput(joinOutput, join.table+"Connection",typesByName, 0) ;
+                                output.nodes[join.table+"_by_"+join.field] = joinOutput ;
+                            }
+                        }else{
+                            throw `Join field ${join.table}_by_${join.field} not found on ${query.name}` ;
+                        }
                     }
                 }
 
