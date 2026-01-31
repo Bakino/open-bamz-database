@@ -258,7 +258,7 @@ DROP TYPE "${data.schema}"."${originalCol.pgType}";\n`
 
             if(col.type === "reference"){
                 sql += `ALTER TABLE "${data.schema}"."${data.table}" ADD CONSTRAINT "fk_${data.table}_${col.code}" 
-                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table}" ("${col.referenced_column}");\n`;
+                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table.split(".").join('"."')}" ("${col.referenced_column}");\n`;
             }
 
             changedColDescriptions.push(`COMMENT ON COLUMN  "${data.schema}"."${data.table}"."${col.code}" IS '${(col.description??"").replaceAll("'", "''")}' ;`)
@@ -274,7 +274,7 @@ DROP TYPE "${data.schema}"."${originalCol.pgType}";\n`
             sql += `ALTER TABLE "${data.schema}"."${data.table}" ALTER COLUMN ${change.change};\n` ;
             if(col.type === "reference"){
                 sql += `ALTER TABLE "${data.schema}"."${data.table}" ADD CONSTRAINT "fk_${data.table}_${col.code}" 
-                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table}" ("${col.referenced_column}");\n`;
+                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table.split(".").join('"."')}" ("${col.referenced_column}");\n`;
             }
         }
         for(let col of removedColumns){
@@ -305,7 +305,7 @@ ${data.columns.map(col=>`COMMENT ON COLUMN  "${data.schema}"."${data.table}"."${
         for(let col of data.columns){
             if(col.type === "reference"){
                 sql += `\nALTER TABLE "${data.schema}"."${data.table}" ADD CONSTRAINT "fk_${data.table}_${col.code}" 
-                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table}" ("${col.referenced_column}");\n`;
+                    FOREIGN KEY ("${col.code}") REFERENCES "${col.referenced_table.split(".").join('"."')}" ("${col.referenced_column}");\n`;
             }
         }
     }

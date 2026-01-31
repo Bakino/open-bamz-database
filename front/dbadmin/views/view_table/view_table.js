@@ -243,6 +243,7 @@ let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 30 
 let decimalDisplayFormat = new Intl.NumberFormat(undefined,{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 let grid = null;
 async function createGrid(){
+    await agGridLoadExtensions() ;
     const gridOptions = {
         rowModelType: "infinite",
         defaultColDef: {

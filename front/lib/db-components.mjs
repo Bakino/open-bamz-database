@@ -1016,6 +1016,33 @@ if(!customElements.get("db-value")){
                 return decimalFormat.format(value) ;
             }else if(type === "text" || type === "character varying" || type === "bpchar"){
                 return value??"" ;
+            }else if(type === "enum"){
+                if(column.enum_values){
+                    let enumOptions = {
+                        type: "select",
+                        values: []
+                    } ;
+                    if(column.type_description){
+                        try{
+                            let parsedDescription = column.type_description ;
+                            if(typeof(parsedDescription) === "string"){
+                                parsedDescription = JSON.parse(parsedDescription) ;
+                            }
+                            if(Array.isArray(parsedDescription)){
+                                enumOptions.values = parsedDescription ;
+                            }else{
+                                enumOptions = parsedDescription
+                            }
+                        // eslint-disable-next-line no-unused-vars
+                        }catch(e){
+                            //malformatted JSON
+                        }
+                    }
+
+                    return enumOptions.values.find(l=>l.value === value)?.label ?? value ;
+                }else{
+                    return "No enum_values found" ;
+                }
             }else if(type.startsWith("json")){
                 if(!value){ 
                     return "" ; 
