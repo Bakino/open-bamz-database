@@ -274,8 +274,10 @@ if(!customElements.get("db-field")){
                 }else if(type === "decimal"){
                     elInput.type = "number" ;
                     elInput.step = "0.01" ;
+                    elInput.style.textAlign = "right"
                 }else if(type === "integer"){
                     elInput.type = "number" ;
+                    elInput.style.textAlign = "right"
                 }else if(type === "email"){
                     elInput.type = "email" ;
                 }else if(type === "phone"){
@@ -284,8 +286,8 @@ if(!customElements.get("db-field")){
                     elInput.type = "color" ;
                 }else{
                     elInput.type = "text" ;
-                    elInput.placeholder = placeholder||label||"" ;
                 }
+                elInput.placeholder = placeholder||label||"" ;
                 return elInput ;
             }
         },
@@ -805,7 +807,9 @@ if(!customElements.get("db-field")){
             
             //console.log("wait for extension done") ;
     
-    
+            if(!this.id){
+                this.id = "id_"+crypto.randomUUID().replaceAll("-", "") ;
+            }
             let type = this.type ;
             let label = this.label;
     
