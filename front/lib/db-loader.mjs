@@ -12,4 +12,4 @@ DbValueExtensions.loadExtension({
     url: `/open-bamz-database/db-values-extensions`,
 }) ;
 
-export { getGraphqlClient };
+export { getGraphqlClient, DbFieldExtensions, DbValueExtensions };
