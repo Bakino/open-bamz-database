@@ -1193,11 +1193,11 @@ ${fields.map(f=>`   * @param ${f}`).join("\n")}
             //always store dev that is the default lang
             pluginsData?.["open-bamz-packaging"]?.pluginSlots?.urlsToDownload.push({
                 url: `/open-bamz-database/db-values-extensions`,
-                dest: `open-bamz-database/db-values-extensions`
+                dest: `open-bamz-database/db-values-extensions.js`
             });
             pluginsData?.["open-bamz-packaging"]?.pluginSlots?.urlsToDownload.push({
                 url: `/open-bamz-database/db-fields-extensions`,
-                dest: `open-bamz-database/db-fields-extensions`
+                dest: `open-bamz-database/db-fields-extensions.js`
             });
         }
     })
