@@ -555,7 +555,7 @@ if(!customElements.get("db-field")){
                     });
                     Object.defineProperty(elInput, 'value', {
                         get() {
-                            const htmlContents = quill.getSemanticHTML();
+                            const htmlContents = quill.getSemanticHTML().replaceAll("&nbsp;", " ").trim() ;
                             if(htmlContents === "<p></p>"){
                                 return "" ;
                             }
