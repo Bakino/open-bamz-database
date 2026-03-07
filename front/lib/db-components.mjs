@@ -538,14 +538,39 @@ if(!customElements.get("db-field")){
                     }
 
                 }else if(type === "html"){
-                    // @ts-ignore
-                    const Quill = (await import("https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm")).default ;
-                    await loadCss("https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css");
                     const optionsQuill = {
                         theme: 'snow',
                         placeholder: placeholder||label||""
                     } ;
                     attributesToOptions(el, optionsQuill, "quill-") ;
+
+                    // @ts-ignore
+                    let Quill = window.Quill ; // by default try to use a global quill
+                    if(!Quill){
+                        // @ts-ignore
+                        Quill = (await import("https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm")).default ;
+                        // @ts-ignore
+                        window.Quill = Quill;
+                        await loadCss("https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css");
+                        
+                        if(optionsQuill.modules?.toolbar){
+                            if(JSON.stringify(optionsQuill.modules.toolbar).includes('"table-better"')){
+                                //load table module
+                                // @ts-ignore
+                                const QuillTableBetter = (await import("https://cdn.jsdelivr.net/npm/quill-table-better@1.2.3/+esm")).default ;
+                                Quill.register({
+                                    'modules/table-better': QuillTableBetter
+                                }, true);
+                                await loadCss("https://cdn.jsdelivr.net/npm/quill-table-better@1.2.3/dist/quill-table-better.css");
+                                if(optionsQuill.modules.tableBetter){
+                                    optionsQuill.modules["table-better"] = optionsQuill.modules.tableBetter ;
+                                    delete optionsQuill.modules.tableBetter ;
+                                }
+                            }
+                        }
+                    }
+                    
+
                     const quill = new Quill(elInput, optionsQuill);
                     elInput.quill = quill ;
 
@@ -563,7 +588,15 @@ if(!customElements.get("db-field")){
                         },
                         set(value) {
                             const delta = quill.clipboard.convert({ html: value??"" });
-                            quill.setContents(delta);
+                            //quill.setContents(delta);
+                            const [range] = quill.selection.getRange();
+                            quill.setContents([], Quill.sources.SILENT);
+                            quill.updateContents(delta, Quill.sources.USER);
+                            quill.setSelection(
+                                delta.length() - (range?.length || 0),
+                                Quill.sources.SILENT
+                            );
+                            //quill.scrollSelectionIntoView();
                         },
                         configurable: true // Make sure the property can be redefined or deleted
                     });
