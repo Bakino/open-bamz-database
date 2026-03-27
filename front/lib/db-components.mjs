@@ -122,6 +122,29 @@ if(!customElements.get("db-field")){
         },
 
         generateEnumLabel: async function ({type, schema, table, column, value, defaultLabel}){
+            if(!defaultLabel){
+                let enumOptions = {
+                    type: "select",
+                    values: []
+                } ;
+                if(column.type_description){
+                    try{
+                        let parsedDescription = column.type_description ;
+                        if(typeof(parsedDescription) === "string"){
+                            parsedDescription = JSON.parse(parsedDescription) ;
+                        }
+                        if(Array.isArray(parsedDescription)){
+                            enumOptions.values = parsedDescription ;
+                        }else{
+                            enumOptions = parsedDescription
+                        }
+                    // eslint-disable-next-line no-unused-vars
+                    }catch(e){
+                        //malformatted JSON
+                    }
+                }
+                defaultLabel = enumOptions.values.find(l=>l.value === value)?.label ?? value
+            }
             return defaultLabel ;
         },
         
@@ -193,7 +216,7 @@ if(!customElements.get("db-field")){
                         for(let val of column.enum_values){
                             const elOption = /** @type {HTMLOptionElement} */ (document.createElement("OPTION")) ;
                             elOption.value = val ;
-                            elOption.innerHTML = await this.generateEnumLabel({
+                            elOption.innerHTML = await DbField.extension.generateEnumLabel({
                                 type: "select", schema, table, column,
                                 value: val, 
                                 defaultLabel: enumOptions.values.find(l=>l.value === val)?.label ?? val
@@ -551,6 +574,9 @@ if(!customElements.get("db-field")){
                         Quill = (await import("https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm")).default ;
                         // @ts-ignore
                         window.Quill = Quill;
+                        // @ts-ignore
+                        window.QuillDelta = Quill.import('delta');
+
                         await loadCss("https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css");
                         
                         if(optionsQuill.modules?.toolbar){
@@ -587,16 +613,40 @@ if(!customElements.get("db-field")){
                             return htmlContents ;
                         },
                         set(value) {
+
                             const delta = quill.clipboard.convert({ html: value??"" });
-                            //quill.setContents(delta);
                             const [range] = quill.selection.getRange();
-                            quill.setContents([], Quill.sources.SILENT);
-                            quill.updateContents(delta, Quill.sources.USER);
+
+                            
+                            // Fusionner : d'abord supprimer tout le contenu existant, puis insérer le nouveau
+                            const currentLength = quill.getLength();
+                            // @ts-ignore
+                            const replaceDelta = new window.QuillDelta().delete(currentLength).concat(delta);
+
+                            quill.updateContents(replaceDelta, Quill.sources.USER);
+
                             quill.setSelection(
                                 delta.length() - (range?.length || 0),
                                 Quill.sources.SILENT
                             );
-                            //quill.scrollSelectionIntoView();
+                            // const delta = quill.clipboard.convert({ html: value??"" });
+                            // //quill.setContents(delta);
+                            // const [range] = quill.selection.getRange();
+                            // quill.setContents([], Quill.sources.SILENT);
+                            // quill.updateContents(delta, Quill.sources.USER);
+                            //     quill.setSelection(
+                            //         delta.length() - (range?.length || 0),
+                            //         Quill.sources.SILENT
+                            //     );
+                            //     //quill.scrollSelectionIntoView();
+                            // setTimeout(()=>{ // set timeout because quill need to render the setContent before doing an updateContents
+                            //     quill.updateContents(delta, Quill.sources.USER);
+                            //     quill.setSelection(
+                            //         delta.length() - (range?.length || 0),
+                            //         Quill.sources.SILENT
+                            //     );
+                            //     //quill.scrollSelectionIntoView();
+                            // }, 0) ;
                         },
                         configurable: true // Make sure the property can be redefined or deleted
                     });
@@ -1247,6 +1297,39 @@ if(!customElements.get("db-value")){
             }
         }
 
+        static async formatDbValue({app, schema, table, column, value}){
+            try{
+                await loadValueExtensions() ;
+                const dbApi = await getGraphqlClient(app) ;
+    
+                const schemaObj = dbApi.schemas.find(s=>s.schema === (schema??"public")) ;
+
+                if(!schemaObj){
+                    throw `Can't find schema ${schema}` ;
+                }
+
+                const tableObj = schemaObj.tables.find(t=>t.table_name === table) ;        
+                if(!tableObj){
+                    throw `Can't find table ${schema}.${table}` ;
+                }
+
+                const columnObj = tableObj.columns.find(t=>t.column_name === column) ;
+                if(!columnObj){
+                    throw `Can't find column ${schema}.${table}.${column}` ;
+                }
+                
+                let type = await DbValue.computeType({column: columnObj}) ;
+                if(!type){
+                    throw "Can't determine type of "+JSON.stringify({app, schema, table, column}) ;
+                }
+
+                
+                return await DbValue.getFormattedValue({type, dbApi, app, schema: schemaObj, table: tableObj, column: columnObj, value}) ;
+            }catch(err){
+                console.error("Error format db value", {app, schema, table, column, value}, err) ;
+            }
+            return "" ;
+        }
         static async renderDbValue({app, schema, table, column, value, elValue}){
             try{
                 await loadValueExtensions() ;
