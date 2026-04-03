@@ -614,21 +614,33 @@ if(!customElements.get("db-field")){
                         },
                         set(value) {
 
-                            const delta = quill.clipboard.convert({ html: value??"" });
-                            const [range] = quill.selection.getRange();
+
+                            // Convertir ton nouveau HTML en delta
+                            const newDelta = quill.clipboard.convert({ html: value??"" });
+
+                            // Calculer le diff entre l'état actuel et le nouveau
+                            const currentDelta = quill.getContents();
+                            const diff = currentDelta.diff(newDelta);
+
+                            // Appliquer seulement les changements
+                            quill.updateContents(diff, Quill.sources.API);
+
+
+                            // const delta = quill.clipboard.convert({ html: value??"" });
+                            // const [range] = quill.selection.getRange();
 
                             
-                            // Fusionner : d'abord supprimer tout le contenu existant, puis insérer le nouveau
-                            const currentLength = quill.getLength();
-                            // @ts-ignore
-                            const replaceDelta = new window.QuillDelta().delete(currentLength).concat(delta);
+                            // // Fusionner : d'abord supprimer tout le contenu existant, puis insérer le nouveau
+                            // const currentLength = quill.getLength();
+                            // // @ts-ignore
+                            // const replaceDelta = new window.QuillDelta().delete(currentLength).concat(delta);
 
-                            quill.updateContents(replaceDelta, Quill.sources.USER);
+                            // quill.updateContents(replaceDelta, Quill.sources.USER);
 
-                            quill.setSelection(
-                                delta.length() - (range?.length || 0),
-                                Quill.sources.SILENT
-                            );
+                            // quill.setSelection(
+                            //     delta.length() - (range?.length || 0),
+                            //     Quill.sources.SILENT
+                            // );
                             // const delta = quill.clipboard.convert({ html: value??"" });
                             // //quill.setContents(delta);
                             // const [range] = quill.selection.getRange();
