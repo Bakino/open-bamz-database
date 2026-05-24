@@ -239,7 +239,7 @@ class CopyRenderer {
 }
 
 let numberFormat = new Intl.NumberFormat();
-let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 30 });
+let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 20 });
 let decimalDisplayFormat = new Intl.NumberFormat(undefined,{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 let grid = null;
 async function createGrid(){

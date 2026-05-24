@@ -1042,7 +1042,7 @@ if(!customElements.get("db-field")){
 if(!customElements.get("db-value")){
 
     let numberFormat = new Intl.NumberFormat();
-    let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 30 });
+    let decimalFormat = new Intl.NumberFormat(undefined,{ maximumFractionDigits: 20 });
     //let decimalDisplayFormat = new Intl.NumberFormat(undefined,{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     const DEFAULT_VALUE_EXTENSION_VALUE = {       
