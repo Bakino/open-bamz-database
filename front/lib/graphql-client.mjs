@@ -222,6 +222,14 @@ class GraphqlClient {
 
     async init(){
         let schemas = [] ;
+        let typesByName = {
+            Query: {
+                fields: []
+            },
+            Mutation: {
+                fields: []
+            }
+        } ;
         try{
             let resultsSchema = await this.queryGraphql(`mutation MyMutation {
                 openbamz_list_schema_and_tables(input: {}) {
@@ -230,6 +238,112 @@ class GraphqlClient {
             }`) ;
     
             schemas = resultsSchema.data.openbamz_list_schema_and_tables.result ;
+
+            let results = await this.queryGraphql(`query IntrospectionQuery {
+        __schema {
+            description
+            queryType { name }
+            mutationType { name }
+            subscriptionType { name }
+            types {
+            ...FullType
+            }
+            directives {
+            name
+            description
+            
+            locations
+            args(includeDeprecated: true) {
+                ...InputValue
+            }
+            }
+        }
+        }
+
+        fragment FullType on __Type {
+        kind
+        name
+        description
+        
+        fields(includeDeprecated: true) {
+            name
+            description
+            args(includeDeprecated: true) {
+            ...InputValue
+            }
+            type {
+            ...TypeRef
+            }
+            isDeprecated
+            deprecationReason
+        }
+        inputFields(includeDeprecated: true) {
+            ...InputValue
+        }
+        interfaces {
+            ...TypeRef
+        }
+        enumValues(includeDeprecated: true) {
+            name
+            description
+            isDeprecated
+            deprecationReason
+        }
+        possibleTypes {
+            ...TypeRef
+        }
+        }
+
+        fragment InputValue on __InputValue {
+        name
+        description
+        type { ...TypeRef }
+        defaultValue
+        isDeprecated
+        deprecationReason
+        }
+
+        fragment TypeRef on __Type {
+        kind
+        name
+        ofType {
+            kind
+            name
+            ofType {
+            kind
+            name
+            ofType {
+                kind
+                name
+                ofType {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                    ofType {
+                    kind
+                    name
+                    ofType {
+                        kind
+                        name
+                    }
+                    }
+                }
+                }
+            }
+            }
+        }
+        }
+            `) ;
+            
+            //let tableList = [] ;
+            for(let type of results.data.__schema.types){
+                typesByName[type.name] = type;
+                // if(type.kind === "OBJECT" && type.fields[0]?.name === "nodeId"){
+                //     tableList.push(type.name) ;
+                // }
+            }
         }catch(err){
             console.warn("Error while fetching schema", err) ;
             schemas = [] ;
@@ -237,111 +351,6 @@ class GraphqlClient {
 
         this.schemas = schemas;
 
-        let results = await this.queryGraphql(`query IntrospectionQuery {
-      __schema {
-        description
-        queryType { name }
-        mutationType { name }
-        subscriptionType { name }
-        types {
-          ...FullType
-        }
-        directives {
-          name
-          description
-          
-          locations
-          args(includeDeprecated: true) {
-            ...InputValue
-          }
-        }
-      }
-    }
-
-    fragment FullType on __Type {
-      kind
-      name
-      description
-      
-      fields(includeDeprecated: true) {
-        name
-        description
-        args(includeDeprecated: true) {
-          ...InputValue
-        }
-        type {
-          ...TypeRef
-        }
-        isDeprecated
-        deprecationReason
-      }
-      inputFields(includeDeprecated: true) {
-        ...InputValue
-      }
-      interfaces {
-        ...TypeRef
-      }
-      enumValues(includeDeprecated: true) {
-        name
-        description
-        isDeprecated
-        deprecationReason
-      }
-      possibleTypes {
-        ...TypeRef
-      }
-    }
-
-    fragment InputValue on __InputValue {
-      name
-      description
-      type { ...TypeRef }
-      defaultValue
-      isDeprecated
-      deprecationReason
-    }
-
-    fragment TypeRef on __Type {
-      kind
-      name
-      ofType {
-        kind
-        name
-        ofType {
-          kind
-          name
-          ofType {
-            kind
-            name
-            ofType {
-              kind
-              name
-              ofType {
-                kind
-                name
-                ofType {
-                  kind
-                  name
-                  ofType {
-                    kind
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-        `) ;
-        let typesByName = {} ;
-        //let tableList = [] ;
-        for(let type of results.data.__schema.types){
-            typesByName[type.name] = type;
-            // if(type.kind === "OBJECT" && type.fields[0]?.name === "nodeId"){
-            //     tableList.push(type.name) ;
-            // }
-        }
         let queries = typesByName["Query"].fields ;
         let self = this;
         for(let query of queries){
