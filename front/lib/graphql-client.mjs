@@ -70,6 +70,12 @@ function prepareQueryArgs(query, params, typesByName, cleanArgs){
                 formattedValue = JSON.stringify(value) ;
             }
         }else if(typeOfArg?.kind === "ENUM" || ["Int", "Float",  "Boolean"].includes(typeOfArg?.name)){
+            if(typeOfArg?.name === "Float" && typeof(value) === "string"){
+                value = parseFloat(value) ;
+                if(isNaN(value)){
+                    value = null;
+                }
+            }
             formattedValue = value ;
         }else{
             if(typeof(value) === "object"){
@@ -344,8 +350,15 @@ class GraphqlClient {
                 //     tableList.push(type.name) ;
                 // }
             }
+            // introspection succeeded: this client is usable
+            this.ready = true ;
         }catch(err){
             console.warn("Error while fetching schema", err) ;
+            // Introspection failed (typically offline at boot). Keep building an
+            // empty client so synchronous callers (e.g. <db-field>) degrade
+            // gracefully instead of throwing, but flag it as not-ready so
+            // getGraphqlClient drops it from the cache and recreates it later.
+            this.ready = false ;
             schemas = [] ;
         }
 
@@ -621,14 +634,24 @@ class GraphqlClient {
             "Content-Type": "application/json",
             Accept: "application/json",
         } ;
-        let result = await fetch("/graphql/"+this.appName, {
-            method: "POST",
-            headers: headers,
-            credentials: "include",
-            body: JSON.stringify({ query: query }),
-        }) ;
-        /** @type {any} */
-        let jsonResult = await result.json() ;
+        let jsonResult ;
+        try{
+            let result = await fetch("/graphql/"+this.appName, {
+                method: "POST",
+                headers: headers,
+                credentials: "include",
+                body: JSON.stringify({ query: query }),
+            }) ;
+            /** @type {any} */
+            jsonResult = await result.json() ;
+        }catch(err){
+            // Network failure / unreachable server / non-JSON response: surface
+            // a NETWORK_ERROR that window.viewzErrorHandler turns into the
+            // connection-error screen, instead of an opaque TypeError. This is
+            // what handles connection loss happening mid-session.
+            console.warn("Network error while calling graphql", err) ;
+            throw new Error("NETWORK_ERROR") ;
+        }
         if(jsonResult.errors){
             console.warn("Error while call query "+query, jsonResult) ;
             throw jsonResult.errors.map(e=>e.message).join(",")
@@ -672,7 +695,14 @@ export async function getGraphqlClient(appName=""){
         const initPromise = cli.init() ;
         GRAPHQL_CLIENTS[appName] = initPromise ;
         await initPromise;
-        GRAPHQL_CLIENTS[appName] = cli ;
+        if(cli.ready){
+            GRAPHQL_CLIENTS[appName] = cli ;
+        }else{
+            // init failed (e.g. offline at boot): don't keep a broken client
+            // cached, so a later call recreates it cleanly once connectivity is
+            // back. The (empty) client is still returned for graceful degradation.
+            delete GRAPHQL_CLIENTS[appName] ;
+        }
     }
 
     if(cli.constructor === Promise){
